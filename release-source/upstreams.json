@@ -1,0 +1,31 @@
+[
+  {
+    "name": "via-app-code",
+    "upstream": "https://github.com/MJL-keyboard/via-app-code.git",
+    "commit": "73543742996816b91678054db3b52865897e4fd4",
+    "fork": "https://github.com/freather-keyspensory/via-app-code.git"
+  },
+  {
+    "name": "via-keyboards",
+    "upstream": "https://github.com/MJL-keyboard/via-keyboards.git",
+    "commit": "f99601eb97badc269a9c68f64bc4f822de332e4a",
+    "fork": "https://github.com/freather-keyspensory/via-keyboards.git"
+  },
+  {
+    "name": "hmkconf",
+    "upstream": "https://github.com/peppapighs/hmkconf.git",
+    "commit": "22884baeb6ef2f684b17ee37ee9c9b7a8f108ced",
+    "fork": "https://github.com/freather-keyspensory/hmkconf.git"
+  },
+  {
+    "name": "zmks-studio",
+    "upstream": "https://github.com/ph-design/zmks-studio.git",
+    "commit": "fb04e7ad1cc0bd7c0544058124b6b96f0a0dad6a",
+    "fork": "https://github.com/freather-keyspensory/zmks-studio.git"
+  },
+  {
+    "name": "zmk-studio-ts-client",
+    "upstream": "https://github.com/ph-design/zmk-studio-ts-client.git",
+    "commit": "7104f905551de1b85d5e802e399a2c6f565d09e4"
+  }
+]
