@@ -1,0 +1,17 @@
+name: Diagnose custom domain DNS
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  dns:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compare authoritative and recursive DNS
+        run: |
+          for ns in ns-cloud-e1.googledomains.com ns-cloud-e2.googledomains.com ns-cloud-e3.googledomains.com ns-cloud-e4.googledomains.com; do
+            echo "Nameserver: $ns"
+            dig +time=5 +tries=1 @"$ns" config.keyspensory.store CNAME +norecurse +noall +answer +comments || true
+          done
+          dig @1.1.1.1 config.keyspensory.store A +noall +answer
+          dig @8.8.8.8 config.keyspensory.store AAAA +noall +answer
+          curl -I --max-time 15 https://config.keyspensory.store/ || true
