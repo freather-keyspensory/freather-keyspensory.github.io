@@ -1,1 +1,0 @@
-import{Rt as e,zt as t}from"./B7Ssm_zi.js";var n=t.object({actuationPoint:e,rtDown:e,rtUp:e,continuous:t.boolean()}),r={actuationPoint:128,rtDown:0,rtUp:0,continuous:!1};export{n,r as t};

@@ -1,0 +1,1 @@
+import"./DHbB0vY5.js";function e(e){return Math.max(4,Math.round(e*255/80))}function t(e){return Math.round(e*80/255)}function n(e,t=2){return(e*4/80).toFixed(t)}function r(e,r=2){return n(t(e),r)}export{e as i,n,t as r,r as t};

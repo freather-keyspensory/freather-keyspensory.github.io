@@ -5506,69 +5506,2352 @@ index 1595da0..0f15d63 100644
      "@sveltejs/adapter-vercel": "^6.3.4",
      "@sveltejs/kit": "^2.70.1",
      "@sveltejs/vite-plugin-svelte": "^7.2.0",
-diff --git a/src/lib/configurator/sidebar/keyboard-menu.svelte b/src/lib/configurator/sidebar/keyboard-menu.svelte
-index dfd64df..bf9845a 100644
---- a/src/lib/configurator/sidebar/keyboard-menu.svelte
-+++ b/src/lib/configurator/sidebar/keyboard-menu.svelte
+diff --git a/src/lib/components/commit-slider.svelte b/src/lib/components/commit-slider.svelte
+index 5e1b4d1..804bbd9 100644
+--- a/src/lib/components/commit-slider.svelte
++++ b/src/lib/components/commit-slider.svelte
 @@ -14,6 +14,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
  -->
  
  <script lang="ts">
-+  import { base } from "$app/paths"
++  import { t } from "$lib/i18n"
+   import { cn, type WithoutChildren } from "$lib/utils"
+   import type { HTMLAttributes } from "svelte/elements"
+   import { Slider } from "./ui/slider"
+@@ -54,10 +55,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ <div class={cn("flex flex-col", className)} {...props}>
+   <div class={cn("grid text-sm text-wrap", disabled && "opacity-50")}>
+     <span class="font-medium">
+-      {title}: {display?.(value) ?? value}
++      {$t(title)}: {display?.(value) ?? value}
+     </span>
+     {#if description}
+-      <span class="text-muted-foreground">{description}</span>
++      <span class="text-muted-foreground">{$t(description)}</span>
+     {/if}
+   </div>
+   <Slider
+diff --git a/src/lib/components/footer.svelte b/src/lib/components/footer.svelte
+index 0e89097..f232e8b 100644
+--- a/src/lib/components/footer.svelte
++++ b/src/lib/components/footer.svelte
+@@ -14,6 +14,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ -->
+ 
+ <script lang="ts">
++  import LanguageSelect from "$lib/components/language-select.svelte"
+   import GithubLink from "./github-link.svelte"
+   import ThemeSwitcher from "./theme-switcher.svelte"
+ </script>
+@@ -23,6 +24,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+     <h1 class="text-xl font-semibold tracking-tight">hmkconf</h1>
+   </div>
+   <div class="flex shrink-0 items-center gap-2">
++    <LanguageSelect />
+     <GithubLink />
+     <ThemeSwitcher />
+   </div>
+diff --git a/src/lib/components/keyboard-editor/keyboard-editor-layout-dialog.svelte b/src/lib/components/keyboard-editor/keyboard-editor-layout-dialog.svelte
+index 5a823dc..95571a9 100644
+--- a/src/lib/components/keyboard-editor/keyboard-editor-layout-dialog.svelte
++++ b/src/lib/components/keyboard-editor/keyboard-editor-layout-dialog.svelte
+@@ -16,6 +16,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ <script lang="ts">
+   import { WrenchIcon } from "@lucide/svelte"
+   import { persistedStateContext } from "$lib/configurator/context.svelte"
++  import { t } from "$lib/i18n"
+   import { keyboardContext } from "$lib/keyboard"
+   import Switch from "../switch.svelte"
+   import { buttonVariants } from "../ui/button"
+@@ -31,7 +32,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ <Popover.Root>
+   <Popover.Trigger class={buttonVariants({ size: "icon", variant: "outline" })}>
+     <WrenchIcon />
+-    <span class="sr-only">Configure Layout</span>
++    <span class="sr-only">{$t("Configure Layout")}</span>
+   </Popover.Trigger>
+   <Popover.Content align="end" class="flex flex-col gap-4">
+     {#each labels as label, i (i)}
+@@ -41,8 +42,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+             () => layoutOptions[i] === 1,
+             (v) => (persistedState.current.layoutOptions[i] = v ? 1 : 0)
+           }
+-          id={label}
+-          title={label}
++          id={$t(label)}
++          title={$t(label)}
+         />
+       {:else}
+         <div class="flex flex-col gap-1.5">
+diff --git a/src/lib/components/keycode-accordion.svelte b/src/lib/components/keycode-accordion.svelte
+index 2dec930..b74fa2a 100644
+--- a/src/lib/components/keycode-accordion.svelte
++++ b/src/lib/components/keycode-accordion.svelte
+@@ -15,6 +15,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ 
+ <script lang="ts">
+   import { XIcon } from "@lucide/svelte"
++  import { t } from "$lib/i18n"
+   import { keyboardContext } from "$lib/keyboard"
    import {
-     CableIcon,
-     ChevronsUpDownIcon,
-@@ -65,7 +66,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+     getCategorizedKeycodes,
+@@ -58,7 +59,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+             const { name, tooltip = "" } = getKeycodeMetadata(keycode)
+             return (
+               name.toLowerCase().includes(lowerSearch) ||
+-              tooltip.toLowerCase().includes(lowerSearch)
++              tooltip.toLowerCase().includes(lowerSearch) ||
++              $t(tooltip).toLowerCase().includes(lowerSearch)
+             )
+           }),
+         ] as const,
+@@ -69,11 +71,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ <div class={cn("flex w-full flex-col gap-2", className)} {...props}>
+   <div class="flex justify-end">
+     <InputGroup.Root class="w-60">
+-      <InputGroup.Input bind:value={search} placeholder="Search..." />
++      <InputGroup.Input bind:value={search} placeholder={$t("Search...")} />
+       <InputGroup.Addon align="inline-end">
+         <InputGroup.Button onclick={() => (search = "")} size="icon-xs">
+           <XIcon />
+-          <span class="sr-only">Clear Search</span>
++          <span class="sr-only">{$t("Clear Search")}</span>
+         </InputGroup.Button>
+       </InputGroup.Addon>
+     </InputGroup.Root>
+@@ -85,7 +87,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+     {#each filteredKeycodes as [category, keycodes] (category)}
+       {#if keycodes.length > 0}
+         <Accordion.Item value={category}>
+-          <Accordion.Trigger>{category}</Accordion.Trigger>
++          <Accordion.Trigger>{$t(category)}</Accordion.Trigger>
+           <Accordion.Content class="flex flex-wrap text-sm">
+             {#each keycodes as keycode (keycode)}
+               <div class="p-0.5" style={unitToStyle()}>
+diff --git a/src/lib/components/keycode-button/keycode-button-tooltip.svelte b/src/lib/components/keycode-button/keycode-button-tooltip.svelte
+index 906a1ab..43e692c 100644
+--- a/src/lib/components/keycode-button/keycode-button-tooltip.svelte
++++ b/src/lib/components/keycode-button/keycode-button-tooltip.svelte
+@@ -14,6 +14,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ -->
+ 
+ <script lang="ts">
++  import { t } from "$lib/i18n"
+   import { getKeycodeMetadata } from "$lib/keycodes"
+   import type { Snippet } from "svelte"
+   import * as Tooltip from "../ui/tooltip"
+@@ -42,6 +43,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+         </div>
+       {/snippet}
+     </Tooltip.Trigger>
+-    <Tooltip.Content class="max-w-56 text-wrap">{tooltip}</Tooltip.Content>
++    <Tooltip.Content class="max-w-56 text-wrap">{$t(tooltip)}</Tooltip.Content>
+   </Tooltip.Root>
+ {/if}
+diff --git a/src/lib/components/language-select.svelte b/src/lib/components/language-select.svelte
+new file mode 100644
+index 0000000..7c56521
+--- /dev/null
++++ b/src/lib/components/language-select.svelte
+@@ -0,0 +1,13 @@
++<script lang="ts">
++  import { language, setLanguage, type Language } from "$lib/i18n"
++</script>
++
++<select
++  aria-label="Language / 语言"
++  class="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground shadow-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
++  value={$language}
++  onchange={(event) => setLanguage(event.currentTarget.value as Language)}
++>
++  <option value="en">English</option>
++  <option value="zh-CN">简体中文</option>
++</select>
+diff --git a/src/lib/components/layer-select.svelte b/src/lib/components/layer-select.svelte
+index a75262f..477b407 100644
+--- a/src/lib/components/layer-select.svelte
++++ b/src/lib/components/layer-select.svelte
+@@ -14,6 +14,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ -->
+ 
+ <script lang="ts">
++  import { t } from "$lib/i18n"
+   import { keyboardContext } from "$lib/keyboard"
+   import { cn, type WithoutChildren } from "$lib/utils"
+   import type { HTMLAttributes } from "svelte/elements"
+@@ -36,7 +37,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ 
+ <div class={cn("flex items-center gap-2", className)} {...props}>
+   <span class={cn("text-sm font-medium", disabled && "opacity-50")}>
+-    Layer
++    {$t("Layer")}
+   </span>
+   <ToggleGroup.Root
+     bind:value={
+diff --git a/src/lib/components/switch.svelte b/src/lib/components/switch.svelte
+index 60f3b79..fed4fc3 100644
+--- a/src/lib/components/switch.svelte
++++ b/src/lib/components/switch.svelte
+@@ -15,6 +15,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ 
+ <script lang="ts">
+   import { InfoIcon } from "@lucide/svelte"
++  import { t } from "$lib/i18n"
+   import { cn, type WithoutChildren } from "$lib/utils"
+   import type { HTMLAttributes } from "svelte/elements"
+   import { Label } from "./ui/label"
+@@ -47,15 +48,15 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ <div class={cn("grid gap-1", className)} {...props}>
+   <div class="flex items-center gap-2">
+     <Switch bind:checked bind:ref {disabled} {id} {onCheckedChange} />
+-    <Label for={id}>{title}</Label>
++    <Label for={id}>{$t(title)}</Label>
+     {#if tooltip}
+       <Tooltip.Root>
+         <Tooltip.Trigger>
+           <InfoIcon class="size-4" />
+-          <span class="sr-only">Info</span>
++          <span class="sr-only">{$t("Info")}</span>
+         </Tooltip.Trigger>
+         <Tooltip.Content class="max-w-56 text-wrap">
+-          {tooltip}
++          {$t(tooltip)}
+         </Tooltip.Content>
+       </Tooltip.Root>
+     {/if}
+@@ -67,7 +68,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+         disabled && "opacity-50",
+       )}
+     >
+-      {description}
++      {$t(description)}
+     </p>
+   {/if}
+ </div>
+diff --git a/src/lib/components/theme-switcher.svelte b/src/lib/components/theme-switcher.svelte
+index 0f09789..d40069f 100644
+--- a/src/lib/components/theme-switcher.svelte
++++ b/src/lib/components/theme-switcher.svelte
+@@ -15,6 +15,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ 
+ <script lang="ts">
+   import { MoonIcon, SunIcon } from "@lucide/svelte"
++  import { t } from "$lib/i18n"
+   import { resetMode, setMode } from "mode-watcher"
+   import { buttonVariants } from "./ui/button"
+   import * as DropdownMenu from "./ui/dropdown-menu"
+@@ -30,12 +31,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+     <MoonIcon
+       class="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 !transition-all dark:scale-100 dark:rotate-0"
+     />
+-    <span class="sr-only">Toggle theme</span>
++    <span class="sr-only">{$t("Toggle theme")}</span>
+   </DropdownMenu.Trigger>
+   <DropdownMenu.Content align="end">
+-    <DropdownMenu.Item onclick={() => setMode("light")}>Light</DropdownMenu.Item
++    <DropdownMenu.Item onclick={() => setMode("light")}
++      >{$t("Light")}</DropdownMenu.Item
++    >
++    <DropdownMenu.Item onclick={() => setMode("dark")}
++      >{$t("Dark")}</DropdownMenu.Item
++    >
++    <DropdownMenu.Item onclick={() => resetMode()}
++      >{$t("System")}</DropdownMenu.Item
+     >
+-    <DropdownMenu.Item onclick={() => setMode("dark")}>Dark</DropdownMenu.Item>
+-    <DropdownMenu.Item onclick={() => resetMode()}>System</DropdownMenu.Item>
+   </DropdownMenu.Content>
+ </DropdownMenu.Root>
+diff --git a/src/lib/components/ui/dialog/dialog-content.svelte b/src/lib/components/ui/dialog/dialog-content.svelte
+index b6eaa18..b526a43 100644
+--- a/src/lib/components/ui/dialog/dialog-content.svelte
++++ b/src/lib/components/ui/dialog/dialog-content.svelte
+@@ -1,6 +1,7 @@
+ <script lang="ts">
+   import XIcon from "@lucide/svelte/icons/x"
+   import { Button } from "$lib/components/ui/button/index.js"
++  import { t } from "$lib/i18n"
+   import { cn, type WithoutChildrenOrChild } from "$lib/utils.js"
+   import { Dialog as DialogPrimitive } from "bits-ui"
+   import type { ComponentProps, Snippet } from "svelte"
+@@ -43,7 +44,7 @@
+             {...props}
+           >
+             <XIcon />
+-            <span class="sr-only">Close</span>
++            <span class="sr-only">{$t("Close")}</span>
+           </Button>
+         {/snippet}
+       </DialogPrimitive.Close>
+diff --git a/src/lib/components/ui/dialog/dialog-footer.svelte b/src/lib/components/ui/dialog/dialog-footer.svelte
+index 553651c..7b2e527 100644
+--- a/src/lib/components/ui/dialog/dialog-footer.svelte
++++ b/src/lib/components/ui/dialog/dialog-footer.svelte
+@@ -1,5 +1,6 @@
+ <script lang="ts">
+   import { Button } from "$lib/components/ui/button/index.js"
++  import { t } from "$lib/i18n"
+   import { cn, type WithElementRef } from "$lib/utils.js"
+   import { Dialog as DialogPrimitive } from "bits-ui"
+   import type { HTMLAttributes } from "svelte/elements"
+@@ -28,7 +29,7 @@
+   {#if showCloseButton}
+     <DialogPrimitive.Close>
+       {#snippet child({ props })}
+-        <Button variant="outline" {...props}>Close</Button>
++        <Button variant="outline" {...props}>{$t("Close")}</Button>
+       {/snippet}
+     </DialogPrimitive.Close>
+   {/if}
+diff --git a/src/lib/components/ui/sheet/sheet-content.svelte b/src/lib/components/ui/sheet/sheet-content.svelte
+index 3c45571..e199080 100644
+--- a/src/lib/components/ui/sheet/sheet-content.svelte
++++ b/src/lib/components/ui/sheet/sheet-content.svelte
+@@ -1,4 +1,6 @@
+ <script lang="ts" module>
++  import { t } from "$lib/i18n"
++
+   export type Side = "top" | "right" | "bottom" | "left"
+ </script>
+ 
+@@ -50,7 +52,7 @@
+             {...props}
+           >
+             <XIcon />
+-            <span class="sr-only">Close</span>
++            <span class="sr-only">{$t("Close")}</span>
+           </Button>
+         {/snippet}
+       </SheetPrimitive.Close>
+diff --git a/src/lib/components/ui/sidebar/sidebar-rail.svelte b/src/lib/components/ui/sidebar/sidebar-rail.svelte
+index f249b9e..86d55b0 100644
+--- a/src/lib/components/ui/sidebar/sidebar-rail.svelte
++++ b/src/lib/components/ui/sidebar/sidebar-rail.svelte
+@@ -1,4 +1,5 @@
+ <script lang="ts">
++  import { t } from "$lib/i18n"
+   import { cn, type WithElementRef } from "$lib/utils.js"
+   import type { HTMLAttributes } from "svelte/elements"
+   import { useSidebar } from "./context.svelte.js"
+@@ -20,10 +21,10 @@
+   bind:this={ref}
+   data-sidebar="rail"
+   data-slot="sidebar-rail"
+-  aria-label="Toggle Sidebar"
++  aria-label={$t("Toggle Sidebar")}
+   tabindex={-1}
+   onclick={sidebar.toggle}
+-  title="Toggle Sidebar"
++  title={$t("Toggle Sidebar")}
+   class={cn(
+     "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border sm:flex",
+     "in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",
+diff --git a/src/lib/components/ui/sidebar/sidebar-trigger.svelte b/src/lib/components/ui/sidebar/sidebar-trigger.svelte
+index b1052af..28bca5f 100644
+--- a/src/lib/components/ui/sidebar/sidebar-trigger.svelte
++++ b/src/lib/components/ui/sidebar/sidebar-trigger.svelte
+@@ -1,6 +1,7 @@
+ <script lang="ts">
+   import PanelLeftIcon from "@lucide/svelte/icons/panel-left"
+   import { Button } from "$lib/components/ui/button/index.js"
++  import { t } from "$lib/i18n"
+   import { cn } from "$lib/utils.js"
+   import type { ComponentProps } from "svelte"
+   import { useSidebar } from "./context.svelte.js"
+@@ -32,5 +33,5 @@
+   {...restProps}
+ >
+   <PanelLeftIcon />
+-  <span class="sr-only">Toggle Sidebar</span>
++  <span class="sr-only">{$t("Toggle Sidebar")}</span>
+ </Button>
+diff --git a/src/lib/components/ui/sidebar/sidebar.svelte b/src/lib/components/ui/sidebar/sidebar.svelte
+index 24a7826..54cfea9 100644
+--- a/src/lib/components/ui/sidebar/sidebar.svelte
++++ b/src/lib/components/ui/sidebar/sidebar.svelte
+@@ -1,5 +1,6 @@
+ <script lang="ts">
+   import * as Sheet from "$lib/components/ui/sheet/index.js"
++  import { t } from "$lib/i18n"
+   import { cn, type WithElementRef } from "$lib/utils.js"
+   import type { HTMLAttributes } from "svelte/elements"
+   import { SIDEBAR_WIDTH_MOBILE } from "./constants.js"
+@@ -51,8 +52,10 @@
+       {side}
+     >
+       <Sheet.Header class="sr-only">
+-        <Sheet.Title>Sidebar</Sheet.Title>
+-        <Sheet.Description>Displays the mobile sidebar.</Sheet.Description>
++        <Sheet.Title>{$t("Sidebar")}</Sheet.Title>
++        <Sheet.Description
++          >{$t("Displays the mobile sidebar.")}</Sheet.Description
++        >
+       </Sheet.Header>
+       <div class="flex h-full w-full flex-col">
+         {@render children?.()}
+diff --git a/src/lib/configurator/advanced-keys/advanced-keys-active-binding.svelte b/src/lib/configurator/advanced-keys/advanced-keys-active-binding.svelte
+index b29d4c0..44d0cb4 100644
+--- a/src/lib/configurator/advanced-keys/advanced-keys-active-binding.svelte
++++ b/src/lib/configurator/advanced-keys/advanced-keys-active-binding.svelte
+@@ -17,6 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import { SquarePenIcon, TrashIcon } from "@lucide/svelte"
+   import * as KeycodeButton from "$lib/components/keycode-button"
+   import { Button } from "$lib/components/ui/button"
++  import { t } from "$lib/i18n"
+   import { HMK_AKType, type HMK_AdvancedKey } from "$lib/libhmk/advanced-keys"
+   import { unitToStyle } from "$lib/ui"
+   import { cn, type WithoutChildren } from "$lib/utils"
+@@ -132,13 +133,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+       variant="outline"
+     >
+       <SquarePenIcon />
+-      <span class="sr-only">Edit</span>
++      <span class="sr-only">{$t("Edit")}</span>
+     </Button>
+     <AdvancedKeysDeleteDialog {index} {advancedKey}>
+       {#snippet child({ props })}
+         <Button size="icon" variant="outline" {...props}>
+           <TrashIcon />
+-          <span class="sr-only">Delete</span>
++          <span class="sr-only">{$t("Delete")}</span>
+         </Button>
+       {/snippet}
+     </AdvancedKeysDeleteDialog>
+diff --git a/src/lib/configurator/advanced-keys/advanced-keys-create-menu.svelte b/src/lib/configurator/advanced-keys/advanced-keys-create-menu.svelte
+index 7ec8b40..c1c3a92 100644
+--- a/src/lib/configurator/advanced-keys/advanced-keys-create-menu.svelte
++++ b/src/lib/configurator/advanced-keys/advanced-keys-create-menu.svelte
+@@ -18,6 +18,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import { KeyButton } from "$lib/components/key-button"
+   import * as KeycodeButton from "$lib/components/keycode-button"
+   import { Button } from "$lib/components/ui/button"
++  import { t } from "$lib/i18n"
+   import { keyboardContext } from "$lib/keyboard"
+   import { HMK_AKType } from "$lib/libhmk/advanced-keys"
+   import { unitToStyle } from "$lib/ui"
+@@ -45,14 +46,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ 
+ <FixedScrollArea class="flex flex-col gap-2 p-4">
+   <div class="flex items-center justify-between gap-4">
+-    <div class="font-semibold">{title}</div>
++    <div class="font-semibold">{$t(title)}</div>
+     <div class="flex items-center gap-2">
+       <Button
+         onclick={() => advancedKeysState.createClose()}
+         size="sm"
+         variant="outline"
+       >
+-        Cancel
++        {$t("Cancel")}
+       </Button>
+       <Button
+         disabled={!advancedKeys || !keymap || keys.some((key) => key === null)}
+@@ -78,16 +79,16 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+         }}
+         size="sm"
+       >
+-        Continue
++        {$t("Continue")}
+       </Button>
+     </div>
+   </div>
+   <div class="flex flex-col gap-4">
+     <div class="grid text-sm">
+       <span class="font-medium">
+-        {`Select ${numKeys > 1 ? `${numKeys} keys` : `${numKeys} key`} to assign ${title} to.`}
++        {`Select ${numKeys > 1 ? `${numKeys} keys` : `${numKeys} key`} to assign ${$t(title)} to.`}
+       </span>
+-      <span class="text-muted-foreground">{description}</span>
++      <span class="text-muted-foreground">{$t(description)}</span>
+     </div>
+     <div class="grid place-items-center">
+       <ToggleGroup.Root
+@@ -100,7 +101,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+       >
+         {#each { length: numKeys }, i (i)}
+           <div class="flex flex-col items-center text-center text-base">
+-            <div class="text-muted-foreground">Key {i + 1}</div>
++            <div class="text-muted-foreground">{$t("Key")} {i + 1}</div>
+             <div class="p-0.5" style={unitToStyle()}>
+               {#if !advancedKeys || !keymap}
+                 <KeycodeButton.Skeleton />
+@@ -117,7 +118,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+                         class="border-dashed font-normal text-muted-foreground"
+                         {...props}
+                       >
+-                        <span>Assign</span>
++                        <span>{$t("Assign")}</span>
+                       </KeyButton>
+                     {/if}
+                   {/snippet}
+diff --git a/src/lib/configurator/advanced-keys/advanced-keys-delete-dialog.svelte b/src/lib/configurator/advanced-keys/advanced-keys-delete-dialog.svelte
+index 756a27e..8e6b274 100644
+--- a/src/lib/configurator/advanced-keys/advanced-keys-delete-dialog.svelte
++++ b/src/lib/configurator/advanced-keys/advanced-keys-delete-dialog.svelte
+@@ -16,6 +16,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ <script lang="ts">
+   import { Button } from "$lib/components/ui/button"
+   import * as Dialog from "$lib/components/ui/dialog"
++  import { t } from "$lib/i18n"
+   import {
+     defaultAdvancedKey,
+     type HMK_AdvancedKey,
+@@ -47,15 +48,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   <Dialog.Trigger {...props}>{@render children?.()}</Dialog.Trigger>
+   <Dialog.Content>
+     <Dialog.Header>
+-      <Dialog.Title>Remove this {title} binding?</Dialog.Title>
++      <Dialog.Title
++        >{$t("Remove this")} {$t(title)} {$t("binding?")}</Dialog.Title
++      >
+       <Dialog.Description>
+-        Are you sure you want to remove this binding?
++        {$t("Are you sure you want to remove this binding?")}
+       </Dialog.Description>
+     </Dialog.Header>
+     <Dialog.Footer>
+       <Dialog.Close>
+         {#snippet child({ props })}
+-          <Button size="sm" variant="outline" {...props}>Cancel</Button>
++          <Button size="sm" variant="outline" {...props}>{$t("Cancel")}</Button>
+         {/snippet}
+       </Dialog.Close>
+       <Dialog.Close
+@@ -70,7 +73,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+         }}
+       >
+         {#snippet child({ props })}
+-          <Button size="sm" variant="destructive" {...props}>Remove</Button>
++          <Button size="sm" variant="destructive" {...props}
++            >{$t("Remove")}</Button
++          >
+         {/snippet}
+       </Dialog.Close>
+     </Dialog.Footer>
+diff --git a/src/lib/configurator/advanced-keys/advanced-keys-main-menu.svelte b/src/lib/configurator/advanced-keys/advanced-keys-main-menu.svelte
+index 5f6e0a7..cec8d25 100644
+--- a/src/lib/configurator/advanced-keys/advanced-keys-main-menu.svelte
++++ b/src/lib/configurator/advanced-keys/advanced-keys-main-menu.svelte
+@@ -17,6 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import FixedScrollArea from "$lib/components/fixed-scroll-area.svelte"
+   import { Button } from "$lib/components/ui/button"
+   import * as Empty from "$lib/components/ui/empty"
++  import { t } from "$lib/i18n"
+   import { keyboardContext } from "$lib/keyboard"
+   import { HMK_AKType } from "$lib/libhmk/advanced-keys"
+   import { isFeatureAvailable } from "$lib/utils"
+@@ -44,7 +45,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ 
+ <div class="grid size-full grid-cols-[28rem_minmax(0,1fr)]">
+   <FixedScrollArea class="flex flex-col gap-4 p-4">
+-    <div class="font-semibold">Add Advanced Key</div>
++    <div class="font-semibold">{$t("Add Advanced Key")}</div>
+     <div class="flex flex-col gap-2">
+       {#each advancedKeyMetadata as { type, icon: Icon, title, description, feature } (type)}
+         {#if feature === undefined || isFeatureAvailable(feature, version)}
+@@ -56,9 +57,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+           >
+             <Icon class="size-6" />
+             <div class="grid text-left text-sm text-wrap">
+-              <span class="font-medium">{title}</span>
++              <span class="font-medium">{$t(title)}</span>
+               <span class="font-normal text-muted-foreground">
+-                {description}
++                {$t(description)}
+               </span>
+             </div>
+           </Button>
+@@ -68,14 +69,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   </FixedScrollArea>
+   <FixedScrollArea class="flex flex-col gap-4 p-4">
+     <div class="font-semibold">
+-      Active Advanced Keys ({String(count ?? 0).padStart(2, "0")}/{String(
+-        numAdvancedKeys,
+-      ).padStart(2, "0")})
++      {$t("Active Advanced Keys (")}{String(count ?? 0).padStart(
++        2,
++        "0",
++      )}/{String(numAdvancedKeys).padStart(2, "0")})
+     </div>
+     {#if !advancedKeys || !count}
+       <Empty.Root class="border border-dashed">
+         <Empty.Header>
+-          <Empty.Description>No active advanced keys...</Empty.Description>
++          <Empty.Description
++            >{$t("No active advanced keys...")}</Empty.Description
++          >
+         </Empty.Header>
+       </Empty.Root>
+     {:else}
+diff --git a/src/lib/configurator/advanced-keys/config-menu/config-menu.svelte b/src/lib/configurator/advanced-keys/config-menu/config-menu.svelte
+index 434a47c..bfb153d 100644
+--- a/src/lib/configurator/advanced-keys/config-menu/config-menu.svelte
++++ b/src/lib/configurator/advanced-keys/config-menu/config-menu.svelte
+@@ -19,6 +19,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import { getAdvancedKeyMetadata } from "$lib/configurator/lib/advanced-keys"
+   import { advancedKeysQueryContext } from "$lib/configurator/queries/advanced-keys-query.svelte"
+   import { macrosQueryContext } from "$lib/configurator/queries/macros-query.svelte"
++  import { t } from "$lib/i18n"
+   import { keyboardContext } from "$lib/keyboard"
+   import AdvancedKeysDeleteDialog from "../advanced-keys-delete-dialog.svelte"
+   import ConfigMenuContent from "./config-menu-content.svelte"
+@@ -36,14 +37,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ {#if !advancedKeys || !macros}
+   <div class="grid size-full place-items-center p-6 text-center">
+     <p class="animate-pulse text-2xl font-semibold text-muted-foreground">
+-      Loading...
++      {$t("Loading...")}
+     </p>
+   </div>
+ {:else}
+   <div class="flex size-full flex-col">
+     <div class="flex items-center justify-between gap-4 p-4">
+       <div class="font-semibold">
+-        {getAdvancedKeyMetadata(version).title}
++        {$t(getAdvancedKeyMetadata(version).title)}
+       </div>
+       <div class="flex items-center gap-2">
+         <AdvancedKeysDeleteDialog
+@@ -51,11 +52,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+           advancedKey={advancedKeys[index!]}
+         >
+           {#snippet child({ props })}
+-            <Button size="sm" variant="destructive" {...props}>Delete</Button>
++            <Button size="sm" variant="destructive" {...props}
++              >{$t("Delete")}</Button
++            >
+           {/snippet}
+         </AdvancedKeysDeleteDialog>
+         <Button onclick={() => advancedKeysState.setIndex(null)} size="sm">
+-          Done
++          {$t("Done")}
+         </Button>
+       </div>
+     </div>
+diff --git a/src/lib/configurator/advanced-keys/config-menu/dynamic-keystroke/actions/actions-headers.svelte b/src/lib/configurator/advanced-keys/config-menu/dynamic-keystroke/actions/actions-headers.svelte
+index c5de96c..5d0d3ac 100644
+--- a/src/lib/configurator/advanced-keys/config-menu/dynamic-keystroke/actions/actions-headers.svelte
++++ b/src/lib/configurator/advanced-keys/config-menu/dynamic-keystroke/actions/actions-headers.svelte
+@@ -20,10 +20,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+     DKS_ROW_PADDING,
+     dynamicKeystrokeHeaders,
+   } from "$lib/configurator/lib/advanced-keys"
++  import { t } from "$lib/i18n"
+ </script>
+ 
+ <div class="grid place-items-center" style:grid-area="bindings">
+-  <span class="text-sm font-medium">Bindings</span>
++  <span class="text-sm font-medium">{$t("Bindings")}</span>
+ </div>
+ {#each dynamicKeystrokeHeaders as { icon: Icon, tooltip }, i (i)}
+   <div class="flex items-center" style:grid-area="icon{i}">
+@@ -33,9 +34,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+         style="margin-left: {DKS_ROW_PADDING + DKS_ACTION_SIZE / 2}px"
+       >
+         <Icon class="size-4" />
+-        <span class="sr-only">{tooltip}</span>
++        <span class="sr-only">{$t(tooltip)}</span>
+       </Tooltip.Trigger>
+-      <Tooltip.Content>{tooltip}</Tooltip.Content>
++      <Tooltip.Content>{$t(tooltip)}</Tooltip.Content>
+     </Tooltip.Root>
+   </div>
+ {/each}
+diff --git a/src/lib/configurator/advanced-keys/config-menu/dynamic-keystroke/actions/actions-interval.svelte b/src/lib/configurator/advanced-keys/config-menu/dynamic-keystroke/actions/actions-interval.svelte
+index a0c0633..72d5729 100644
+--- a/src/lib/configurator/advanced-keys/config-menu/dynamic-keystroke/actions/actions-interval.svelte
++++ b/src/lib/configurator/advanced-keys/config-menu/dynamic-keystroke/actions/actions-interval.svelte
+@@ -21,6 +21,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+     getDKSIntervalWidth,
+     intervalsToBitmap,
+   } from "$lib/configurator/lib/advanced-keys"
++  import { t } from "$lib/i18n"
+   import { dksActionsStateContext } from "./context.svelte"
+ 
+   const { index }: { index: number } = $props()
+@@ -43,7 +44,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   style:width="{intervalWidth}px"
+   style:height="{DKS_ACTION_SIZE}px"
+ >
+-  <span class="sr-only">Delete Action</span>
++  <span class="sr-only">{$t("Delete Action")}</span>
+ </button>
+ <div
+   class="absolute top-1/2 z-20 flex h-4 w-3 -translate-1/2 items-center justify-center rounded-xs border bg-accent"
+diff --git a/src/lib/configurator/advanced-keys/config-menu/dynamic-keystroke/dynamic-keystroke-config-menu.svelte b/src/lib/configurator/advanced-keys/config-menu/dynamic-keystroke/dynamic-keystroke-config-menu.svelte
+index cd41e2b..fcec654 100644
+--- a/src/lib/configurator/advanced-keys/config-menu/dynamic-keystroke/dynamic-keystroke-config-menu.svelte
++++ b/src/lib/configurator/advanced-keys/config-menu/dynamic-keystroke/dynamic-keystroke-config-menu.svelte
+@@ -16,6 +16,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ <script lang="ts">
+   import FixedScrollArea from "$lib/components/fixed-scroll-area.svelte"
+   import * as Tabs from "$lib/components/ui/tabs"
++  import { t } from "$lib/i18n"
+   import KeyTesterTab from "../key-tester-tab.svelte"
+   import TickRateSlider from "../tick-rate-slider.svelte"
+   import DynamicKeystrokeActions from "./actions/actions.svelte"
+@@ -31,11 +32,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ 
+ <FixedScrollArea class="flex flex-col gap-4 p-4 pt-0">
+   <div class="grid text-sm">
+-    <span class="font-medium">Configure DKS Bindings</span>
++    <span class="font-medium">{$t("Configure DKS Bindings")}</span>
+     <span class="text-muted-foreground">
+-      Assign bindings using the menu on the right. For a tap action, click the
+-      plus icon once. For a hold action, click the plus icon and drag it to the
+-      desired key position based on your preferred behavior.
++      {$t(
++        "Assign bindings using the menu on the right. For a tap action, click the plus icon once. For a hold action, click the plus icon and drag it to the desired key position based on your preferred behavior.",
++      )}
+     </span>
+   </div>
+   <DynamicKeystrokeActions />
+@@ -43,10 +44,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ <FixedScrollArea class="flex flex-col gap-4 p-4 pt-0">
+   <Tabs.Root value="bindings">
+     <Tabs.List>
+-      <Tabs.Trigger value="bindings">Bindings</Tabs.Trigger>
+-      <Tabs.Trigger value="performance">Performance</Tabs.Trigger>
+-      <Tabs.Trigger value="advanced">Advanced</Tabs.Trigger>
+-      <Tabs.Trigger value="key-tester">Key Tester</Tabs.Trigger>
++      <Tabs.Trigger value="bindings">{$t("Bindings")}</Tabs.Trigger>
++      <Tabs.Trigger value="performance">{$t("Performance")}</Tabs.Trigger>
++      <Tabs.Trigger value="advanced">{$t("Advanced")}</Tabs.Trigger>
++      <Tabs.Trigger value="key-tester">{$t("Key Tester")}</Tabs.Trigger>
+     </Tabs.List>
+     <div class="p-2">
+       <Tabs.Content value="bindings">
+diff --git a/src/lib/configurator/advanced-keys/config-menu/dynamic-keystroke/dynamic-keystroke-performance-tab.svelte b/src/lib/configurator/advanced-keys/config-menu/dynamic-keystroke/dynamic-keystroke-performance-tab.svelte
+index ee3b11f..a15703f 100644
+--- a/src/lib/configurator/advanced-keys/config-menu/dynamic-keystroke/dynamic-keystroke-performance-tab.svelte
++++ b/src/lib/configurator/advanced-keys/config-menu/dynamic-keystroke/dynamic-keystroke-performance-tab.svelte
+@@ -18,6 +18,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import DistanceSlider from "$lib/components/distance-slider.svelte"
+   import { actuationQueryContext } from "$lib/configurator/queries/actuation-query.svelte"
+   import { distanceToUnit } from "$lib/distance"
++  import { t } from "$lib/i18n"
+   import { DEFAULT_ACTUATION_POINT } from "$lib/libhmk/actuation"
+   import type { HMK_AKDynamicKeystroke } from "$lib/libhmk/advanced-keys"
+   import { cn, optMap, type WithoutChildren } from "$lib/utils"
+@@ -53,7 +54,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+     description="Set the actuation point for &quot;Key press&quot; and &quot;Key release&quot; actions."
+     disabled={!actuationMap}
+     max={distanceToUnit(action.bottomOutPoint)}
+-    title="Actuation Point"
++    title={$t("Actuation Point")}
+   />
+   <DistanceSlider
+     bind:committed={
+@@ -63,12 +64,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+     description="Set the actuation point for &quot;Key fully pressed&quot; and &quot;Key released from fully pressed&quot; actions."
+     disabled={!actuationMap}
+     min={optMap(actuationMap?.[key].actuationPoint, distanceToUnit)}
+-    title="Bottom Out Point"
++    title={$t("Bottom Out Point")}
+   />
+   <div class="flex items-center gap-2 text-muted-foreground">
+     <InfoIcon class="size-4" />
+     <p class="text-sm">
+-      Rapid Trigger is automatically disabled for Dynamic Keystroke keys.
++      {$t(
++        "Rapid Trigger is automatically disabled for Dynamic Keystroke keys.",
++      )}
+     </p>
+   </div>
+ </div>
+diff --git a/src/lib/configurator/advanced-keys/config-menu/key-tester-tab.svelte b/src/lib/configurator/advanced-keys/config-menu/key-tester-tab.svelte
+index 1cd4f80..718b6fa 100644
+--- a/src/lib/configurator/advanced-keys/config-menu/key-tester-tab.svelte
++++ b/src/lib/configurator/advanced-keys/config-menu/key-tester-tab.svelte
+@@ -15,6 +15,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ 
+ <script lang="ts">
+   import * as KeyTester from "$lib/components/key-tester"
++  import { t } from "$lib/i18n"
+   import { cn, type WithoutChildren } from "$lib/utils"
+   import type { HTMLAttributes } from "svelte/elements"
+ 
+@@ -27,11 +28,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ <KeyTester.Root>
+   <div class={cn("flex flex-col gap-4", className)} {...props}>
+     <div class="flex flex-col gap-2">
+-      <div class="text-sm font-medium">Pressed Keys</div>
++      <div class="text-sm font-medium">{$t("Pressed Keys")}</div>
+       <KeyTester.Press class="h-24 max-w-72" />
+     </div>
+     <div class="flex flex-col gap-2">
+-      <div class="text-sm font-medium">Released Keys</div>
++      <div class="text-sm font-medium">{$t("Released Keys")}</div>
+       <KeyTester.Release class="h-24 max-w-72" />
+     </div>
+   </div>
+diff --git a/src/lib/configurator/advanced-keys/config-menu/macro/macro-config-menu.svelte b/src/lib/configurator/advanced-keys/config-menu/macro/macro-config-menu.svelte
+index df6fd3e..a70ddf3 100644
+--- a/src/lib/configurator/advanced-keys/config-menu/macro/macro-config-menu.svelte
++++ b/src/lib/configurator/advanced-keys/config-menu/macro/macro-config-menu.svelte
+@@ -24,6 +24,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+     getMacroSequence,
+   } from "$lib/configurator/lib/advanced-keys"
+   import { macrosQueryContext } from "$lib/configurator/queries/macros-query.svelte"
++  import { t } from "$lib/i18n"
+   import type { HMK_AKMacro } from "$lib/libhmk/advanced-keys"
+   import { Keycode } from "$lib/libhmk/keycodes"
+   import { HMK_MACRO_NODE_NONE, HMK_MacroAction } from "$lib/libhmk/macro"
+@@ -55,10 +56,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ 
+ <FixedScrollArea class="flex flex-col gap-4 p-4 pt-0">
+   <div class="grid text-sm">
+-    <span class="font-medium">Configure Macro Actions</span>
++    <span class="font-medium">{$t("Configure Macro Actions")}</span>
+     <span class="text-muted-foreground">
+-      Create a sequence of actions to be triggered when the key is pressed.
+-      Assign bindings for each action using the menu on the right.
++      {$t(
++        "Create a sequence of actions to be triggered when the key is pressed. Assign bindings for each action using the menu on the right.",
++      )}
+     </span>
+   </div>
+   <div class="flex flex-col gap-4">
+@@ -94,13 +96,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+         size="sm"
+         variant="outline"
+       >
+-        <PlusIcon /> Add
++        <PlusIcon />
++        {$t("Add")}
+       </Button>
+     </div>
+     {#if macroSequence.length === 0}
+       <Empty.Root class="border border-dashed">
+         <Empty.Header>
+-          <Empty.Description>No macro actions...</Empty.Description>
++          <Empty.Description>{$t("No macro actions...")}</Empty.Description>
+         </Empty.Header>
+       </Empty.Root>
+     {:else}
+@@ -125,9 +128,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ <FixedScrollArea class="flex flex-col gap-4 p-4 pt-0">
+   <Tabs.Root value="bindings">
+     <Tabs.List>
+-      <Tabs.Trigger value="bindings">Bindings</Tabs.Trigger>
+-      <Tabs.Trigger value="advanced">Advanced</Tabs.Trigger>
+-      <Tabs.Trigger value="key-tester">Key Tester</Tabs.Trigger>
++      <Tabs.Trigger value="bindings">{$t("Bindings")}</Tabs.Trigger>
++      <Tabs.Trigger value="advanced">{$t("Advanced")}</Tabs.Trigger>
++      <Tabs.Trigger value="key-tester">{$t("Key Tester")}</Tabs.Trigger>
+     </Tabs.List>
+     <div class="p-2">
+       <Tabs.Content value="bindings">
+diff --git a/src/lib/configurator/advanced-keys/config-menu/macro/macro-node.svelte b/src/lib/configurator/advanced-keys/config-menu/macro/macro-node.svelte
+index c4ea930..77e9039 100644
+--- a/src/lib/configurator/advanced-keys/config-menu/macro/macro-node.svelte
++++ b/src/lib/configurator/advanced-keys/config-menu/macro/macro-node.svelte
+@@ -21,6 +21,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import * as ToggleGroupUI from "$lib/components/ui/toggle-group"
+   import { macroActions } from "$lib/configurator/lib/advanced-keys"
+   import { macrosQueryContext } from "$lib/configurator/queries/macros-query.svelte"
++  import { t } from "$lib/i18n"
+   import type { HMK_AKMacro } from "$lib/libhmk/advanced-keys"
+   import { Keycode } from "$lib/libhmk/keycodes"
+   import { HMK_MAX_MACRO_DELAY } from "$lib/libhmk/macro"
+@@ -80,7 +81,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   <div
+     class="grid flex-1 auto-rows-[1fr] grid-cols-[max-content_1fr] items-center gap-2 p-2 pl-3 text-sm font-medium"
+   >
+-    <span>Action</span>
++    <span>{$t("Action")}</span>
+     <ToggleGroupUI.Root
+       bind:value={
+         () => String(macroNode.action),
+@@ -101,7 +102,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+         </ToggleGroupUI.Item>
+       {/each}
+     </ToggleGroupUI.Root>
+-    <span>Delay</span>
++    <span>{$t("Delay")}</span>
+     <div class="flex items-center gap-2">
+       <Input
+         bind:value={
+@@ -138,7 +139,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+       variant="outline"
+     >
+       <TrashIcon />
+-      <span class="sr-only">Delete</span>
++      <span class="sr-only">{$t("Delete")}</span>
+     </Button>
+   </div>
+ </div>
+diff --git a/src/lib/configurator/advanced-keys/config-menu/null-bind/null-bind-config-menu.svelte b/src/lib/configurator/advanced-keys/config-menu/null-bind/null-bind-config-menu.svelte
+index b4e64f5..9d8fab8 100644
+--- a/src/lib/configurator/advanced-keys/config-menu/null-bind/null-bind-config-menu.svelte
++++ b/src/lib/configurator/advanced-keys/config-menu/null-bind/null-bind-config-menu.svelte
+@@ -22,6 +22,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import * as Tabs from "$lib/components/ui/tabs"
+   import * as Tooltip from "$lib/components/ui/tooltip"
+   import { nullBindBehaviorMetadata } from "$lib/configurator/lib/advanced-keys"
++  import { t } from "$lib/i18n"
+   import {
+     DEFAULT_BOTTOM_OUT_POINT,
+     type HMK_AKNullBind,
+@@ -36,10 +37,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ 
+ <FixedScrollArea class="flex flex-col gap-4 p-4 pt-0">
+   <div class="grid text-sm text-wrap">
+-    <span class="font-medium">Configure Null Bind Resolution Behavior</span>
++    <span class="font-medium"
++      >{$t("Configure Null Bind Resolution Behavior")}</span
++    >
+     <span class="text-muted-foreground">
+-      Select how Null Bind resolves key presses when both keys are pressed
+-      simultaneously.
++      {$t(
++        "Select how Null Bind resolves key presses when both keys are pressed simultaneously.",
++      )}
+     </span>
+   </div>
+   <RadioGroup.Root
+@@ -52,13 +56,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+       <div class="flex items-center gap-3">
+         <RadioGroup.Item id={String(behavior)} value={String(behavior)} />
+         <div class="flex flex-1 items-center gap-2">
+-          <Label class="flex-1" for={String(behavior)}>{title}</Label>
++          <Label class="flex-1" for={String(behavior)}>{$t(title)}</Label>
+           <Tooltip.Root>
+             <Tooltip.Trigger>
+               <InfoIcon class="size-4" />
+-              <span class="sr-only">Info</span>
++              <span class="sr-only">{$t("Info")}</span>
+             </Tooltip.Trigger>
+-            <Tooltip.Content>{description}</Tooltip.Content>
++            <Tooltip.Content>{$t(description)}</Tooltip.Content>
+           </Tooltip.Root>
+         </div>
+       </div>
+@@ -75,14 +79,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+     }
+     description="Enable this option to register both key presses when keys are fully pressed simultaneously, bypassing the resolution behavior."
+     id="alternative-fully-pressed-behavior"
+-    title="Alternative Fully Pressed Behavior"
++    title={$t("Alternative Fully Pressed Behavior")}
+   />
+ </FixedScrollArea>
+ <FixedScrollArea class="flex flex-col gap-4 p-4 pt-0">
+   <Tabs.Root value="performance">
+     <Tabs.List>
+-      <Tabs.Trigger value="performance">Performance</Tabs.Trigger>
+-      <Tabs.Trigger value="key-tester">Key Tester</Tabs.Trigger>
++      <Tabs.Trigger value="performance">{$t("Performance")}</Tabs.Trigger>
++      <Tabs.Trigger value="key-tester">{$t("Key Tester")}</Tabs.Trigger>
+     </Tabs.List>
+     <div class="p-2">
+       <Tabs.Content value="performance">
+diff --git a/src/lib/configurator/advanced-keys/config-menu/null-bind/null-bind-performance-tab.svelte b/src/lib/configurator/advanced-keys/config-menu/null-bind/null-bind-performance-tab.svelte
+index 6c4803c..1f28af6 100644
+--- a/src/lib/configurator/advanced-keys/config-menu/null-bind/null-bind-performance-tab.svelte
++++ b/src/lib/configurator/advanced-keys/config-menu/null-bind/null-bind-performance-tab.svelte
+@@ -18,6 +18,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import Switch from "$lib/components/switch.svelte"
+   import { actuationQueryContext } from "$lib/configurator/queries/actuation-query.svelte"
+   import { distanceToUnit, SWITCH_DISTANCE_UNIT } from "$lib/distance"
++  import { t } from "$lib/i18n"
+   import {
+     DEFAULT_ACTUATION_POINT,
+     DEFAULT_RT_SENSITIVITY,
+@@ -78,7 +79,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+     {disabled}
+     description="Enable Rapid Trigger to compare keys only when Rapid Trigger registers a key press. Additional Rapid Trigger options are available in the Performance tab."
+     id="rapid-trigger"
+-    title="Enable Rapid Trigger"
++    title={$t("Enable Rapid Trigger")}
+   />
+   <DistanceSlider
+     bind:committed={
+@@ -94,7 +95,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+     max={action.bottomOutPoint > 0
+       ? distanceToUnit(action.bottomOutPoint)
+       : SWITCH_DISTANCE_UNIT}
+-    title="Actuation Point"
++    title={$t("Actuation Point")}
+   />
+   {#if action.bottomOutPoint > 0}
+     <DistanceSlider
+@@ -105,7 +106,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+       description="Set the actuation point at which the key is considered fully pressed."
+       {disabled}
+       min={optMap(currentActuation?.actuationPoint, distanceToUnit)}
+-      title="Bottom Out Point"
++      title={$t("Bottom Out Point")}
+     />
+   {/if}
+ </div>
+diff --git a/src/lib/configurator/advanced-keys/config-menu/tap-hold/tap-hold-advanced-tab.svelte b/src/lib/configurator/advanced-keys/config-menu/tap-hold/tap-hold-advanced-tab.svelte
+index 71b29ca..de92fe7 100644
+--- a/src/lib/configurator/advanced-keys/config-menu/tap-hold/tap-hold-advanced-tab.svelte
++++ b/src/lib/configurator/advanced-keys/config-menu/tap-hold/tap-hold-advanced-tab.svelte
+@@ -16,6 +16,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ <script lang="ts">
+   import CommitSlider from "$lib/components/commit-slider.svelte"
+   import Switch from "$lib/components/switch.svelte"
++  import { t } from "$lib/i18n"
+   import {
+     MAX_TAPPING_TERM,
+     MIN_TAPPING_TERM,
+@@ -43,7 +44,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+     }
+     description="Immediately perform the hold action if another non-Tap-Hold key is pressed."
+     id="hold-on-other-key-press"
+-    title="Hold on Other Key Press"
++    title={$t("Hold on Other Key Press")}
+   />
+   <CommitSlider
+     bind:committed={
+@@ -55,7 +56,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+     min={MIN_TAPPING_TERM}
+     max={MAX_TAPPING_TERM}
+     step={10}
+-    title="Tapping Term"
++    title={$t("Tapping Term")}
+   />
+   <TickRateSlider />
+ </div>
+diff --git a/src/lib/configurator/advanced-keys/config-menu/tap-hold/tap-hold-config-menu.svelte b/src/lib/configurator/advanced-keys/config-menu/tap-hold/tap-hold-config-menu.svelte
+index bf7c025..469b4f0 100644
+--- a/src/lib/configurator/advanced-keys/config-menu/tap-hold/tap-hold-config-menu.svelte
++++ b/src/lib/configurator/advanced-keys/config-menu/tap-hold/tap-hold-config-menu.svelte
+@@ -17,6 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import FixedScrollArea from "$lib/components/fixed-scroll-area.svelte"
+   import { KeycodeButton } from "$lib/components/keycode-button"
+   import * as Tabs from "$lib/components/ui/tabs"
++  import { t } from "$lib/i18n"
+   import type { HMK_AKTapHold } from "$lib/libhmk/advanced-keys"
+   import { Keycode } from "$lib/libhmk/keycodes"
+   import { unitToStyle } from "$lib/ui"
+@@ -40,9 +41,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ 
+ <FixedScrollArea class="flex flex-col gap-4 p-4 pt-0">
+   <div class="grid text-sm">
+-    <span class="font-medium">Configure Tap-Hold Bindings</span>
++    <span class="font-medium">{$t("Configure Tap-Hold Bindings")}</span>
+     <span class="text-muted-foreground">
+-      Assign bindings for tap and hold actions of the key.
++      {$t("Assign bindings for tap and hold actions of the key.")}
+     </span>
+   </div>
+   <div class="grid place-items-center">
+@@ -52,7 +53,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+       type="single"
+     >
+       <div class="flex flex-col items-center text-center text-base">
+-        <div class="text-muted-foreground">Tap</div>
++        <div class="text-muted-foreground">{$t("Tap")}</div>
+         <div class="p-0.5" style={unitToStyle()}>
+           <ToggleGroup.Item
+             oncontextmenu={(e) => {
+@@ -71,7 +72,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+         </div>
+       </div>
+       <div class="flex flex-col items-center text-center text-base">
+-        <div class="text-muted-foreground">Hold</div>
++        <div class="text-muted-foreground">{$t("Hold")}</div>
+         <div class="p-0.5" style={unitToStyle()}>
+           <ToggleGroup.Item
+             oncontextmenu={(e) => {
+@@ -95,9 +96,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ <FixedScrollArea class="flex flex-col gap-4 p-4 pt-0">
+   <Tabs.Root value="bindings">
+     <Tabs.List>
+-      <Tabs.Trigger value="bindings">Bindings</Tabs.Trigger>
+-      <Tabs.Trigger value="advanced">Advanced</Tabs.Trigger>
+-      <Tabs.Trigger value="key-tester">Key Tester</Tabs.Trigger>
++      <Tabs.Trigger value="bindings">{$t("Bindings")}</Tabs.Trigger>
++      <Tabs.Trigger value="advanced">{$t("Advanced")}</Tabs.Trigger>
++      <Tabs.Trigger value="key-tester">{$t("Key Tester")}</Tabs.Trigger>
+     </Tabs.List>
+     <div class="p-2">
+       <Tabs.Content value="bindings">
+diff --git a/src/lib/configurator/advanced-keys/config-menu/tick-rate-slider.svelte b/src/lib/configurator/advanced-keys/config-menu/tick-rate-slider.svelte
+index f8b735a..ad751d1 100644
+--- a/src/lib/configurator/advanced-keys/config-menu/tick-rate-slider.svelte
++++ b/src/lib/configurator/advanced-keys/config-menu/tick-rate-slider.svelte
+@@ -17,6 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import { InfoIcon } from "@lucide/svelte"
+   import CommitSlider from "$lib/components/commit-slider.svelte"
+   import { tickRateQueryContext } from "$lib/configurator/queries/tick-rate-query.svelte"
++  import { t } from "$lib/i18n"
+   import { DEFAULT_TICK_RATE } from "$lib/libhmk/advanced-keys"
+   import { cn, type WithoutChildren } from "$lib/utils"
+   import type { HTMLAttributes } from "svelte/elements"
+@@ -40,13 +41,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+     min={0}
+     max={255}
+     step={5}
+-    title="Tick Rate"
++    title={$t("Tick Rate")}
+   />
+   <div class="flex items-center gap-2 text-muted-foreground">
+     <InfoIcon class="size-4" />
+     <p class="text-sm text-wrap">
+-      The tick rate is per profile and only affects Dynamic Keystroke, Tap-Hold,
+-      and Macro keys.
++      {$t(
++        "The tick rate is per profile and only affects Dynamic Keystroke, Tap-Hold, and Macro keys.",
++      )}
+     </p>
+   </div>
+ </div>
+diff --git a/src/lib/configurator/advanced-keys/config-menu/toggle/toggle-advanced-tab.svelte b/src/lib/configurator/advanced-keys/config-menu/toggle/toggle-advanced-tab.svelte
+index fd121c3..7da657c 100644
+--- a/src/lib/configurator/advanced-keys/config-menu/toggle/toggle-advanced-tab.svelte
++++ b/src/lib/configurator/advanced-keys/config-menu/toggle/toggle-advanced-tab.svelte
+@@ -15,6 +15,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ 
+ <script lang="ts">
+   import CommitSlider from "$lib/components/commit-slider.svelte"
++  import { t } from "$lib/i18n"
+   import {
+     MAX_TAPPING_TERM,
+     MIN_TAPPING_TERM,
+@@ -44,6 +45,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+     min={MIN_TAPPING_TERM}
+     max={MAX_TAPPING_TERM}
+     step={10}
+-    title="Tapping Term"
++    title={$t("Tapping Term")}
+   />
+ </div>
+diff --git a/src/lib/configurator/advanced-keys/config-menu/toggle/toggle-config-menu.svelte b/src/lib/configurator/advanced-keys/config-menu/toggle/toggle-config-menu.svelte
+index 270791e..ef06a93 100644
+--- a/src/lib/configurator/advanced-keys/config-menu/toggle/toggle-config-menu.svelte
++++ b/src/lib/configurator/advanced-keys/config-menu/toggle/toggle-config-menu.svelte
+@@ -17,6 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import FixedScrollArea from "$lib/components/fixed-scroll-area.svelte"
+   import { KeycodeButton } from "$lib/components/keycode-button"
+   import * as Tabs from "$lib/components/ui/tabs"
++  import { t } from "$lib/i18n"
+   import type { HMK_AKToggle } from "$lib/libhmk/advanced-keys"
+   import { Keycode } from "$lib/libhmk/keycodes"
+   import { unitToStyle } from "$lib/ui"
+@@ -40,9 +41,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ 
+ <FixedScrollArea class="flex flex-col gap-4 p-4 pt-0">
+   <div class="grid text-sm">
+-    <span class="font-medium">Configure Toggle Binding</span>
++    <span class="font-medium">{$t("Configure Toggle Binding")}</span>
+     <span class="text-muted-foreground">
+-      Assign a binding for the toggle action of the key.
++      {$t("Assign a binding for the toggle action of the key.")}
+     </span>
+   </div>
+   <div class="grid place-items-center text-base">
+@@ -67,9 +68,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ <FixedScrollArea class="flex flex-col gap-4 p-4 pt-0">
+   <Tabs.Root value="bindings">
+     <Tabs.List>
+-      <Tabs.Trigger value="bindings">Bindings</Tabs.Trigger>
+-      <Tabs.Trigger value="advanced">Advanced</Tabs.Trigger>
+-      <Tabs.Trigger value="key-tester">Key Tester</Tabs.Trigger>
++      <Tabs.Trigger value="bindings">{$t("Bindings")}</Tabs.Trigger>
++      <Tabs.Trigger value="advanced">{$t("Advanced")}</Tabs.Trigger>
++      <Tabs.Trigger value="key-tester">{$t("Key Tester")}</Tabs.Trigger>
+     </Tabs.List>
+     <div class="p-2">
+       <Tabs.Content value="bindings">
+diff --git a/src/lib/configurator/calibration/calibration-menu.svelte b/src/lib/configurator/calibration/calibration-menu.svelte
+index 9989aed..0cdaa0f 100644
+--- a/src/lib/configurator/calibration/calibration-menu.svelte
++++ b/src/lib/configurator/calibration/calibration-menu.svelte
+@@ -19,6 +19,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import * as KeyTester from "$lib/components/key-tester"
+   import Switch from "$lib/components/switch.svelte"
+   import { Button } from "$lib/components/ui/button"
++  import { t } from "$lib/i18n"
+   import { keyboardContext } from "$lib/keyboard"
+   import { isFeatureAvailable } from "$lib/utils"
+   import { toast } from "svelte-sonner"
+@@ -54,7 +55,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+         }
+         disabled={demo || !options}
+         id="save-bottom-out-threshold"
+-        title="Save Bottom Out Threshold"
++        title={$t("Save Bottom Out Threshold")}
+         description="Periodically save the per-key bottom-out threshold values after some inactivity to be restored on next boot. The saved values will only be cleared on recalibration. This setting applies globally across all profiles."
+       />
+     {/if}
+@@ -75,7 +76,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+       min={0}
+       max={(1 << adcResolution) - 1}
+       step={10}
+-      title="Initial Noise Floor"
++      title={$t("Initial Noise Floor")}
+     />
+     <CommitSlider
+       bind:committed={
+@@ -95,7 +96,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+       min={0}
+       max={(1 << adcResolution) - 1}
+       step={10}
+-      title="Initial Bottom Out Threshold"
++      title={$t("Initial Bottom Out Threshold")}
+     />
+     <div class="flex gap-2">
+       <Button
+@@ -104,18 +105,18 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+         size="sm"
+         variant="destructive"
+       >
+-        Recalibrate
++        {$t("Recalibrate")}
+       </Button>
+       {#if isFeatureAvailable("saveCalibrationThreshold", version)}
+         <Button
+           disabled={demo}
+           onclick={async () => {
+             await keyboard.saveCalibrationThreshold()
+-            toast.success("Successfully saved calibration threshold.")
++            toast.success($t("Successfully saved calibration threshold."))
+           }}
+           size="sm"
+         >
+-          Save Current Threshold
++          {$t("Save Current Threshold")}
+         </Button>
+       {/if}
+     </div>
+@@ -123,11 +124,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   <FixedScrollArea class="flex flex-col gap-4 p-4">
+     <KeyTester.Root>
+       <div class="flex flex-col gap-2">
+-        <div class="text-sm font-medium">Pressed Keys</div>
++        <div class="text-sm font-medium">{$t("Pressed Keys")}</div>
+         <KeyTester.Press class="h-32 w-full" />
+       </div>
+       <div class="flex flex-col gap-2">
+-        <div class="text-sm font-medium">Released Keys</div>
++        <div class="text-sm font-medium">{$t("Released Keys")}</div>
+         <KeyTester.Release class="h-32 w-full" />
+       </div>
+     </KeyTester.Root>
+diff --git a/src/lib/configurator/calibration/calibration-menubar.svelte b/src/lib/configurator/calibration/calibration-menubar.svelte
+index d750a2a..f9bc916 100644
+--- a/src/lib/configurator/calibration/calibration-menubar.svelte
++++ b/src/lib/configurator/calibration/calibration-menubar.svelte
+@@ -17,17 +17,18 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import * as KeyboardEditor from "$lib/components/keyboard-editor"
+   import { Badge } from "$lib/components/ui/badge"
+   import * as Tooltip from "$lib/components/ui/tooltip"
++  import { t } from "$lib/i18n"
+ </script>
+ 
+ <KeyboardEditor.Menubar>
+   <Tooltip.Root>
+     <Tooltip.Trigger>
+-      <Badge variant="destructive">Warning</Badge>
++      <Badge variant="destructive">{$t("Warning")}</Badge>
+     </Tooltip.Trigger>
+     <Tooltip.Content class="max-w-sm text-wrap">
+-      This tab requests data from the keyboard at a high frequency, which may
+-      impact performance. Please close this tab or switch to another one when
+-      performing other performance-sensitive tasks with your keyboard.
++      {$t(
++        "This tab requests data from the keyboard at a high frequency, which may impact performance. Please close this tab or switch to another one when performing other performance-sensitive tasks with your keyboard.",
++      )}
+     </Tooltip.Content>
+   </Tooltip.Root>
+   <KeyboardEditor.LayoutDialog />
+diff --git a/src/lib/configurator/gamepad/analog-curve/analog-curve-graphic.svelte b/src/lib/configurator/gamepad/analog-curve/analog-curve-graphic.svelte
+index ab36b64..781cf10 100644
+--- a/src/lib/configurator/gamepad/analog-curve/analog-curve-graphic.svelte
++++ b/src/lib/configurator/gamepad/analog-curve/analog-curve-graphic.svelte
+@@ -19,6 +19,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+     CURVE_VIEW_HEIGHT,
+     CURVE_VIEW_WIDTH,
+   } from "$lib/configurator/lib/gamepad"
++  import { t } from "$lib/i18n"
+   import { analogCurveStateContext } from "./context.svelte"
+ 
+   const { viewCurve } = $derived(analogCurveStateContext.get())
+@@ -51,10 +52,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   >
+     <Tooltip.Root>
+       <Tooltip.Trigger class="m-2 text-sm text-muted-foreground">
+-        Key Start Deadzone
++        {$t("Key Start Deadzone")}
+       </Tooltip.Trigger>
+       <Tooltip.Content class="max-w-sm text-wrap">
+-        No gamepad analog input will be sent.
++        {$t("No gamepad analog input will be sent.")}
+       </Tooltip.Content>
+     </Tooltip.Root>
+   </div>
+@@ -64,11 +65,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   >
+     <Tooltip.Root>
+       <Tooltip.Trigger class="m-2 text-sm text-muted-foreground">
+-        Key End Deadzone
++        {$t("Key End Deadzone")}
+       </Tooltip.Trigger>
+       <Tooltip.Content class="max-w-sm text-wrap">
+-        Maximum gamepad analog input will be sent. For joysticks, the angle will
+-        snap to the nearest 45 degree, functioning similar to a D-Pad.
++        {$t(
++          "Maximum gamepad analog input will be sent. For joysticks, the angle will snap to the nearest 45 degree, functioning similar to a D-Pad.",
++        )}
+       </Tooltip.Content>
+     </Tooltip.Root>
+   </div>
+diff --git a/src/lib/configurator/gamepad/analog-curve/analog-curve-labels.svelte b/src/lib/configurator/gamepad/analog-curve/analog-curve-labels.svelte
+index 2291808..92e7db8 100644
+--- a/src/lib/configurator/gamepad/analog-curve/analog-curve-labels.svelte
++++ b/src/lib/configurator/gamepad/analog-curve/analog-curve-labels.svelte
+@@ -15,6 +15,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ 
+ <script lang="ts">
+   import { displayDistance } from "$lib/distance"
++  import { t } from "$lib/i18n"
+   import { HMK_MAX_DISTANCE, HMK_MIN_DISTANCE } from "$lib/libhmk"
+ </script>
+ 
+@@ -28,7 +29,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   class="flex -rotate-90 flex-col items-center justify-center text-sm whitespace-nowrap text-muted-foreground"
+   style:grid-area="analog-label"
+ >
+-  Analog Value
++  {$t("Analog Value")}
+ </div>
+ <div
+   class="flex flex-col items-center justify-end text-sm text-muted-foreground"
+@@ -46,7 +47,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   class="flex items-center justify-center text-sm text-muted-foreground"
+   style:grid-area="switch-label"
+ >
+-  Key Press Distance
++  {$t("Key Press Distance")}
+ </div>
+ <div
+   class="flex items-center justify-end text-sm text-muted-foreground"
+diff --git a/src/lib/configurator/gamepad/analog-curve/analog-curve-presets.svelte b/src/lib/configurator/gamepad/analog-curve/analog-curve-presets.svelte
+index f9d8b78..e6d4730 100644
+--- a/src/lib/configurator/gamepad/analog-curve/analog-curve-presets.svelte
++++ b/src/lib/configurator/gamepad/analog-curve/analog-curve-presets.svelte
+@@ -17,6 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import { Button } from "$lib/components/ui/button"
+   import { analogCurvePresets } from "$lib/configurator/lib/gamepad"
+   import { gamepadQueryContext } from "$lib/configurator/queries/gamepad-query.svelte"
++  import { t } from "$lib/i18n"
+   import { HMK_MAX_DISTANCE, HMK_MIN_DISTANCE } from "$lib/libhmk"
+ 
+   const gamepadQuery = gamepadQueryContext.get()
+@@ -53,7 +54,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+           vector-effect="non-scaling-stroke"
+         />
+       </svg>
+-      {name}
++      {$t(name)}
+     </Button>
+   {/each}
+ </div>
+diff --git a/src/lib/configurator/gamepad/gamepad-analog-tab.svelte b/src/lib/configurator/gamepad/gamepad-analog-tab.svelte
+index 371b853..0bbf784 100644
+--- a/src/lib/configurator/gamepad/gamepad-analog-tab.svelte
++++ b/src/lib/configurator/gamepad/gamepad-analog-tab.svelte
+@@ -1,6 +1,7 @@
+ <script lang="ts">
+   import FixedScrollArea from "$lib/components/fixed-scroll-area.svelte"
+   import Switch from "$lib/components/switch.svelte"
++  import { t } from "$lib/i18n"
+   import { cn, type WithoutChildren } from "$lib/utils"
+   import type { HTMLAttributes } from "svelte/elements"
+   import { gamepadQueryContext } from "../queries/gamepad-query.svelte"
+@@ -18,11 +19,11 @@
+ <div class={cn("grid grid-cols-[minmax(0,1fr)_28rem]", className)} {...props}>
+   <FixedScrollArea class="flex flex-col gap-4 p-6 pt-2 pr-4">
+     <div class="grid text-sm">
+-      <span class="font-medium">Configure Analog Curve</span>
++      <span class="font-medium">{$t("Configure Analog Curve")}</span>
+       <span class="text-muted-foreground">
+-        Modify how keyboard analog values translate to gamepad analog inputs.
+-        You can manually adjust the analog curve or select a preset from below.
+-        These settings affect both joysticks and triggers.
++        {$t(
++          "Modify how keyboard analog values translate to gamepad analog inputs. You can manually adjust the analog curve or select a preset from below. These settings affect both joysticks and triggers.",
++        )}
+       </span>
+     </div>
+     <AnalogCurve />
+@@ -40,7 +41,7 @@
+       description="Remove the circular boundaries of the joystick for full range of motion."
+       disabled={!options}
+       id="square-joystick"
+-      title="Square Joystick Mode"
++      title={$t("Square Joystick Mode")}
+     />
+     <Switch
+       bind:checked={
+@@ -54,7 +55,7 @@
+       description="Use the maximum analog value between opposite joystick axes instead of combining them for more responsive movement."
+       disabled={!options}
+       id="snappy-joystick"
+-      title="Snappy Joystick"
++      title={$t("Snappy Joystick")}
+     />
+   </FixedScrollArea>
+ </div>
+diff --git a/src/lib/configurator/gamepad/gamepad-menu.svelte b/src/lib/configurator/gamepad/gamepad-menu.svelte
+index 887b611..18bd601 100644
+--- a/src/lib/configurator/gamepad/gamepad-menu.svelte
++++ b/src/lib/configurator/gamepad/gamepad-menu.svelte
+@@ -16,6 +16,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ <script lang="ts">
+   import { Badge } from "$lib/components/ui/badge"
+   import * as Tabs from "$lib/components/ui/tabs"
++  import { t } from "$lib/i18n"
+   import { gamepadStateContext } from "../context.svelte"
+   import { optionsQueryContext } from "../queries/options-query.svelte"
+   import GamepadAnalogTab from "./gamepad-analog-tab.svelte"
+@@ -33,11 +34,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ >
+   <div class="flex items-center gap-4 p-4 pb-0">
+     <Tabs.List>
+-      <Tabs.Trigger value="setup">Setup</Tabs.Trigger>
+-      <Tabs.Trigger value="analog">Analog</Tabs.Trigger>
++      <Tabs.Trigger value="setup">{$t("Setup")}</Tabs.Trigger>
++      <Tabs.Trigger value="analog">{$t("Analog")}</Tabs.Trigger>
+     </Tabs.List>
+     {#if options && !options.xInputEnabled}
+-      <Badge variant="destructive">XInput interface is disabled</Badge>
++      <Badge variant="destructive">{$t("XInput interface is disabled")}</Badge>
+     {/if}
+   </div>
+   <Tabs.Content value="setup">
+diff --git a/src/lib/configurator/gamepad/gamepad-menubar.svelte b/src/lib/configurator/gamepad/gamepad-menubar.svelte
+index c7b81e2..4ef38ce 100644
+--- a/src/lib/configurator/gamepad/gamepad-menubar.svelte
++++ b/src/lib/configurator/gamepad/gamepad-menubar.svelte
+@@ -16,6 +16,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ <script lang="ts">
+   import * as KeyboardEditor from "$lib/components/keyboard-editor"
+   import Switch from "$lib/components/switch.svelte"
++  import { t } from "$lib/i18n"
+   import { optionsQueryContext } from "../queries/options-query.svelte"
+ 
+   const optionsQuery = optionsQueryContext.get()
+@@ -31,7 +32,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+     }
+     disabled={!options}
+     id="xinput-enabled"
+-    title="Enable XInput Interface"
++    title={$t("Enable XInput Interface")}
+     tooltip="Allow your keyboard to be recognized as an Xbox controller for gamepad input. Restart the keyboard to apply changes. This setting applies globally across all profiles."
+   />
+   <KeyboardEditor.LayoutDialog />
+diff --git a/src/lib/configurator/gamepad/gamepad-setup-tab.svelte b/src/lib/configurator/gamepad/gamepad-setup-tab.svelte
+index 7adb3bb..789ea83 100644
+--- a/src/lib/configurator/gamepad/gamepad-setup-tab.svelte
++++ b/src/lib/configurator/gamepad/gamepad-setup-tab.svelte
+@@ -17,6 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import FixedScrollArea from "$lib/components/fixed-scroll-area.svelte"
+   import { KeycodeButton } from "$lib/components/keycode-button"
+   import Switch from "$lib/components/switch.svelte"
++  import { t } from "$lib/i18n"
+   import { gamepadButtonToKeycode } from "$lib/keycodes/gamepad"
+   import { unitToStyle } from "$lib/ui"
+   import { cn, type WithoutChildren } from "$lib/utils"
+@@ -40,9 +41,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ <div class={cn("grid grid-cols-[minmax(0,1fr)_28rem]", className)} {...props}>
+   <FixedScrollArea class="flex flex-col gap-4 p-6 pt-2 pr-4">
+     <div class="grid text-sm">
+-      <span class="font-medium">Configure Controller Bindings</span>
++      <span class="font-medium">{$t("Configure Controller Bindings")}</span>
+       <span class="text-muted-foreground">
+-        Assign gamepad buttons to your keyboard.
++        {$t("Assign gamepad buttons to your keyboard.")}
+       </span>
+     </div>
+     <div class="flex flex-wrap text-sm">
+@@ -74,7 +75,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+       description="Allow keyboard inputs to be sent along with gamepad inputs."
+       disabled={!options}
+       id="keyboard-enabled"
+-      title="Enable Keyboard Inputs"
++      title={$t("Enable Keyboard Inputs")}
+     />
+     <Switch
+       bind:checked={
+@@ -88,7 +89,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+       description="Disable keyboard inputs on keys bound to gamepad buttons."
+       disabled={!options || !options.keyboardEnabled}
+       id="gamepad-override"
+-      title="Gamepad Override"
++      title={$t("Gamepad Override")}
+     />
+   </FixedScrollArea>
+ </div>
+diff --git a/src/lib/configurator/layout.svelte b/src/lib/configurator/layout.svelte
+index c3ffb78..82e5f03 100644
+--- a/src/lib/configurator/layout.svelte
++++ b/src/lib/configurator/layout.svelte
+@@ -16,8 +16,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ <script lang="ts">
+   import { MonitorIcon } from "@lucide/svelte"
+   import GithubLink from "$lib/components/github-link.svelte"
++  import LanguageSelect from "$lib/components/language-select.svelte"
+   import ThemeSwitcher from "$lib/components/theme-switcher.svelte"
+   import * as Sidebar from "$lib/components/ui/sidebar"
++  import { t } from "$lib/i18n"
+   import { Tabs } from "bits-ui"
+   import type { ComponentProps } from "svelte"
+   import { globalStateContext } from "./context.svelte"
+@@ -43,7 +45,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+     <MonitorIcon class="size-24" />
+     <div class="mx-auto max-w-2xl text-center">
+       <p class="mt-4 text-lg font-medium text-wrap">
+-        Your window is too small. Please resize your window, or zoom out.
++        {$t(
++          "Your window is too small. Please resize your window, or zoom out.",
++        )}
+       </p>
+     </div>
+   </div>
+@@ -62,6 +66,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+             <ProfileSelect />
+           </div>
+           <div class="flex shrink-0 items-center gap-2">
++            <LanguageSelect />
+             <GithubLink />
+             <ThemeSwitcher />
+           </div>
+diff --git a/src/lib/configurator/performance/performance-menu.svelte b/src/lib/configurator/performance/performance-menu.svelte
+index 4cc1646..22ce966 100644
+--- a/src/lib/configurator/performance/performance-menu.svelte
++++ b/src/lib/configurator/performance/performance-menu.svelte
+@@ -17,6 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import DistanceSlider from "$lib/components/distance-slider.svelte"
+   import FixedScrollArea from "$lib/components/fixed-scroll-area.svelte"
+   import Switch from "$lib/components/switch.svelte"
++  import { t } from "$lib/i18n"
+   import {
+     DEFAULT_ACTUATION_POINT,
+     DEFAULT_RT_SENSITIVITY,
+@@ -70,7 +71,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+         ? "Set the specific distance at which Rapid Trigger activates and deactivates."
+         : "Set the specific distance at which a key press and release is registered."}
+       {disabled}
+-      title="Actuation Point"
++      title={$t("Actuation Point")}
+     />
+     <DistanceSlider
+       bind:committed={
+@@ -93,7 +94,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+         }
+         description="Set the minimum distance change required for Rapid Trigger to register a key release."
+         disabled={disabled || !rtEnabled}
+-        title="Rapid Trigger Release Sensitivity"
++        title={$t("Rapid Trigger Release Sensitivity")}
+       />
+     {/if}
+   </FixedScrollArea>
+@@ -112,7 +113,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+       description="Rapid Trigger registers key presses and releases based on changes in key distance rather than absolute position. It activates and deactivates at the actuation point."
+       {disabled}
+       id="rapid-trigger"
+-      title="Enable Rapid Trigger"
++      title={$t("Enable Rapid Trigger")}
+     />
+ 
+     <Switch
+@@ -127,7 +128,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+       description="Configure sensitivity for key presses and releases independently."
+       disabled={disabled || !rtEnabled}
+       id="separate-rt"
+-      title="Separate Press/Release Sensitivity"
++      title={$t("Separate Press/Release Sensitivity")}
+     />
+     <Switch
+       bind:checked={
+@@ -141,7 +142,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+       description="Deactivates Rapid Trigger only when the key is fully released, instead of at the actuation point."
+       disabled={disabled || !rtEnabled}
+       id="continuous-rapid-trigger"
+-      title="Continuous Rapid Trigger"
++      title={$t("Continuous Rapid Trigger")}
+     />
+   </FixedScrollArea>
+ </div>
+diff --git a/src/lib/configurator/performance/performance-menubar.svelte b/src/lib/configurator/performance/performance-menubar.svelte
+index 0c1ef7b..102fc5a 100644
+--- a/src/lib/configurator/performance/performance-menubar.svelte
++++ b/src/lib/configurator/performance/performance-menubar.svelte
+@@ -17,6 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import * as KeyboardEditor from "$lib/components/keyboard-editor"
+   import { Button } from "$lib/components/ui/button"
+   import { Toggle } from "$lib/components/ui/toggle"
++  import { t } from "$lib/i18n"
+   import { defaultActuation } from "$lib/libhmk/actuation"
+   import { setToIntervals } from "$lib/utils"
+   import {
+@@ -40,7 +41,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+       disabled={allKeys.every((key) => keys.has(key))}
+       onclick={() => allKeys.forEach((key) => keys.add(key))}
+       size="sm"
+-      variant="outline">Select All</Button
++      variant="outline">{$t("Select All")}</Button
+     >
+     <Button
+       disabled={keys.size === 0}
+@@ -48,14 +49,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+       size="sm"
+       variant="outline"
+     >
+-      Deselect All
++      {$t("Deselect All")}
+     </Button>
+     <Toggle
+       bind:pressed={performanceState.showKeymap}
+       size="sm"
+       variant="outline"
+     >
+-      Show Keymap
++      {$t("Show Keymap")}
+     </Toggle>
+   </div>
+   <div class="flex items-center gap-2">
+@@ -73,7 +74,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+       size="sm"
+       variant="destructive"
+     >
+-      Reset Selected
++      {$t("Reset Selected")}
+     </Button>
+     <KeyboardEditor.LayoutDialog />
+   </div>
+diff --git a/src/lib/configurator/profile-select.svelte b/src/lib/configurator/profile-select.svelte
+index 0d9a3fd..967ebe3 100644
+--- a/src/lib/configurator/profile-select.svelte
++++ b/src/lib/configurator/profile-select.svelte
+@@ -17,6 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import { KeyboardIcon } from "@lucide/svelte"
+   import * as Select from "$lib/components/ui/select"
+   import * as Tooltip from "$lib/components/ui/tooltip"
++  import { t } from "$lib/i18n"
+   import { keyboardContext } from "$lib/keyboard"
+   import { globalStateContext } from "./context.svelte"
+   import { profileQueryContext } from "./queries/profile-query.svelte"
+@@ -36,7 +37,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ >
+   <Select.Trigger class="w-48" size="sm">
+     <span class="flex items-center gap-2">
+-      Profile {profile}
++      {$t("Profile")}
++      {profile}
+       {#if keyboardProfile === profile}
+         <KeyboardIcon />
+       {/if}
+@@ -46,14 +48,15 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+     {#each { length: numProfiles }, i (i)}
+       <Select.Item value={String(i)}>
+         <span class="flex items-center gap-2">
+-          Profile {i}
++          {$t("Profile")}
++          {i}
+           {#if keyboardProfile === i}
+             <Tooltip.Root>
+               <Tooltip.Trigger>
+                 <KeyboardIcon />
+-                <span class="sr-only">Active</span>
++                <span class="sr-only">{$t("Active")}</span>
+               </Tooltip.Trigger>
+-              <Tooltip.Content>Current Active Profile</Tooltip.Content>
++              <Tooltip.Content>{$t("Current Active Profile")}</Tooltip.Content>
+             </Tooltip.Root>
+           {/if}
+         </span>
+diff --git a/src/lib/configurator/profiles/profiles-tab.svelte b/src/lib/configurator/profiles/profiles-tab.svelte
+index c58d108..f78fb93 100644
+--- a/src/lib/configurator/profiles/profiles-tab.svelte
++++ b/src/lib/configurator/profiles/profiles-tab.svelte
+@@ -19,6 +19,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import { Badge } from "$lib/components/ui/badge"
+   import { Button } from "$lib/components/ui/button"
+   import * as DropdownMenu from "$lib/components/ui/dropdown-menu"
++  import { t } from "$lib/i18n"
+   import { keyboardContext } from "$lib/keyboard"
+   import { cn, type WithoutChildren } from "$lib/utils"
+   import { toast } from "svelte-sonner"
+@@ -51,17 +52,21 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+       try {
+         const json = JSON.parse(await file.text())
+         await keyboardConfig.setConfig(profile, json)
+-        toast.success(`Successfully imported Profile ${profile}.`)
++        toast.success(
++          $t("Successfully imported Profile {number}.", { number: profile }),
++        )
+       } catch (err) {
+         if (err instanceof SyntaxError) {
+-          toast.error("The selected file is not a valid JSON.")
++          toast.error($t("The selected file is not a valid JSON."))
+         } else if (err instanceof z.ZodError) {
+           toast.error(
+-            "The selected file is not a valid keyboard metadata. See console for details.",
++            $t(
++              "The selected file is not a valid keyboard metadata. See console for details.",
++            ),
+           )
+           console.error(z.treeifyError(err))
+         } else {
+-          toast.error(String(err))
++          toast.error($t(err instanceof Error ? err.message : String(err)))
+         }
+       }
+     }
+@@ -77,15 +82,19 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+       })
+       anchorRef.href = URL.createObjectURL(blob)
+       anchorRef.download = `${name}-profile-${profile}.json`
+-      toast.success(`Successfully exported Profile ${profile}.`)
++      toast.success(
++        $t("Successfully exported Profile {number}.", { number: profile }),
++      )
+     } catch (err) {
+       if (err instanceof z.ZodError) {
+         toast.error(
+-          "Unexpected keyboard configuration schema error. See console for details.",
++          $t(
++            "Unexpected keyboard configuration schema error. See console for details.",
++          ),
+         )
+         console.error(z.treeifyError(err))
+       } else {
+-        toast.error(String(err))
++        toast.error($t(err instanceof Error ? err.message : String(err)))
+       }
+     }
+     anchorRef.click()
+@@ -98,10 +107,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ >
+   <FixedScrollArea class="flex flex-col gap-4 p-4">
+     <div class="grid shrink-0">
+-      <span class="font-semibold">Configure Profiles</span>
++      <span class="font-semibold">{$t("Configure Profiles")}</span>
+       <span class="text-sm text-muted-foreground">
+-        Manage your keyboard profiles here. You can import, export, and
+-        customize them.
++        {$t(
++          "Manage your keyboard profiles here. You can import, export, and customize them.",
++        )}
+       </span>
+     </div>
+     <div class="grid grid-cols-2 gap-4">
+@@ -110,32 +120,33 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+           class="flex items-center gap-4 rounded-lg border bg-card p-4 text-card-foreground shadow-sm"
+         >
+           <div class="grid flex-1 truncate font-semibold">
+-            Profile {profile}
++            {$t("Profile")}
++            {profile}
+           </div>
+           <div class="flex shrink-0 items-center gap-2">
+             {#if profile === currentProfile}
+-              <Badge>Active</Badge>
++              <Badge>{$t("Active")}</Badge>
+             {/if}
+             <DropdownMenu.Root>
+               <DropdownMenu.Trigger>
+                 {#snippet child({ props })}
+                   <Button size="icon" variant="ghost" {...props}>
+                     <EllipsisVerticalIcon />
+-                    <span class="sr-only">Open Menu</span>
++                    <span class="sr-only">{$t("Open Menu")}</span>
+                   </Button>
+                 {/snippet}
+               </DropdownMenu.Trigger>
+               <DropdownMenu.Content align="start" class="w-40">
+                 <DropdownMenu.Group>
+                   <DropdownMenu.Item onSelect={() => importProfile(profile)}>
+-                    Import
++                    {$t("Import")}
+                   </DropdownMenu.Item>
+                   <DropdownMenu.Item onSelect={() => exportProfile(profile)}>
+-                    Export
++                    {$t("Export")}
+                   </DropdownMenu.Item>
+                   <DropdownMenu.Sub>
+                     <DropdownMenu.SubTrigger>
+-                      Duplicate From
++                      {$t("Duplicate From")}
+                     </DropdownMenu.SubTrigger>
+                     <DropdownMenu.SubContent>
+                       {#each { length: numProfiles }, srcProfile (srcProfile)}
+@@ -147,7 +158,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+                                 srcProfile,
+                               })}
+                           >
+-                            Profile {srcProfile}
++                            {$t("Profile")}
++                            {srcProfile}
+                           </DropdownMenu.Item>
+                         {/if}
+                       {/each}
+@@ -156,7 +168,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+                   <DropdownMenu.Item
+                     onSelect={() => profileQuery.resetProfile({ profile })}
+                   >
+-                    Restore Default
++                    {$t("Restore Default")}
+                   </DropdownMenu.Item>
+                 </DropdownMenu.Group>
+               </DropdownMenu.Content>
+diff --git a/src/lib/configurator/remap/remap-menubar.svelte b/src/lib/configurator/remap/remap-menubar.svelte
+index b3dd5d8..4b4d66c 100644
+--- a/src/lib/configurator/remap/remap-menubar.svelte
++++ b/src/lib/configurator/remap/remap-menubar.svelte
+@@ -17,6 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import * as KeyboardEditor from "$lib/components/keyboard-editor"
+   import LayerSelect from "$lib/components/layer-select.svelte"
+   import { Button } from "$lib/components/ui/button"
++  import { t } from "$lib/i18n"
+   import { keyboardContext } from "$lib/keyboard"
+   import { globalStateContext, remapStateContext } from "../context.svelte"
+   import { keymapQueryContext } from "../queries/keymap-query.svelte"
+@@ -42,7 +43,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+       size="sm"
+       variant="destructive"
+     >
+-      Reset Current Layer
++      {$t("Reset Current Layer")}
+     </Button>
+     <KeyboardEditor.LayoutDialog />
+   </div>
+diff --git a/src/lib/configurator/settings/settings-tab.svelte b/src/lib/configurator/settings/settings-tab.svelte
+index 436d64b..3c1061e 100644
+--- a/src/lib/configurator/settings/settings-tab.svelte
++++ b/src/lib/configurator/settings/settings-tab.svelte
+@@ -18,6 +18,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import Switch from "$lib/components/switch.svelte"
+   import { Button } from "$lib/components/ui/button"
+   import * as Dialog from "$lib/components/ui/dialog"
++  import { t } from "$lib/i18n"
+   import { keyboardContext } from "$lib/keyboard"
+   import { cn, isFeatureAvailable, type WithoutChildren } from "$lib/utils"
+   import type { HTMLAttributes } from "svelte/elements"
+@@ -57,16 +58,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+             })
+         }
+         id="8000hz-polling-rate"
+-        title="8000Hz Polling Rate"
++        title={$t("8000Hz Polling Rate")}
+         description="Enable the 8000Hz polling rate for faster response times, but may increase the CPU usage of the host device. Restart the keyboard to apply changes. This setting applies globally across all profiles."
+       />
+     {/if}
+     <div class="flex flex-col gap-2">
+       <div class="grid text-sm text-wrap">
+-        <span class="font-semibold">Restart Keyboard</span>
++        <span class="font-semibold">{$t("Restart Keyboard")}</span>
+         <span class="text-muted-foreground">
+-          The keyboard will disconnect and reconnect. No changes will be made to
+-          your keyboard settings.
++          {$t(
++            "The keyboard will disconnect and reconnect. No changes will be made to your keyboard settings.",
++          )}
+         </span>
+       </div>
+       <div>
+@@ -76,16 +78,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+           size="sm"
+           variant="outline"
+         >
+-          Restart Keyboard
++          {$t("Restart Keyboard")}
+         </Button>
+       </div>
+     </div>
+     <div class="flex flex-col gap-2">
+       <div class="grid text-sm text-wrap">
+-        <span class="font-semibold">Enter Bootloader Mode</span>
++        <span class="font-semibold">{$t("Enter Bootloader Mode")}</span>
+         <span class="text-muted-foreground">
+-          The keyboard will restart and enter bootloader mode if it is supported
+-          by the firmware. No changes will be made to your keyboard settings.
++          {$t(
++            "The keyboard will restart and enter bootloader mode if it is supported by the firmware. No changes will be made to your keyboard settings.",
++          )}
+         </span>
+       </div>
+       <div>
+@@ -95,16 +98,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+           size="sm"
+           variant="outline"
+         >
+-          Enter Bootloader Mode
++          {$t("Enter Bootloader Mode")}
+         </Button>
+       </div>
+     </div>
+     <div class="flex flex-col gap-2">
+       <div class="grid text-sm text-wrap">
+-        <span class="font-semibold">Factory Reset</span>
++        <span class="font-semibold">{$t("Factory Reset")}</span>
+         <span class="text-muted-foreground">
+-          Revert the keyboard to its factory settings defined by the firmware.
+-          All user data and settings will be lost.
++          {$t(
++            "Revert the keyboard to its factory settings defined by the firmware. All user data and settings will be lost.",
++          )}
+         </span>
+       </div>
+       <div>
+@@ -117,27 +121,29 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+                 variant="destructive"
+                 {...props}
+               >
+-                Factory Reset
++                {$t("Factory Reset")}
+               </Button>
+             {/snippet}
+           </Dialog.Trigger>
+           <Dialog.Content>
+             <Dialog.Header>
+-              <Dialog.Title>Factory Reset?</Dialog.Title>
++              <Dialog.Title>{$t("Factory Reset?")}</Dialog.Title>
+               <Dialog.Description>
+-                Are you sure you want to factory reset your keyboard?
++                {$t("Are you sure you want to factory reset your keyboard?")}
+               </Dialog.Description>
+             </Dialog.Header>
+             <Dialog.Footer>
+               <Dialog.Close>
+                 {#snippet child({ props })}
+-                  <Button size="sm" variant="outline" {...props}>Cancel</Button>
++                  <Button size="sm" variant="outline" {...props}
++                    >{$t("Cancel")}</Button
++                  >
+                 {/snippet}
+               </Dialog.Close>
+               <Dialog.Close onclick={() => profileQuery.factoryReset()}>
+                 {#snippet child({ props })}
+                   <Button size="sm" variant="destructive" {...props}>
+-                    Factory Reset
++                    {$t("Factory Reset")}
+                   </Button>
+                 {/snippet}
+               </Dialog.Close>
+diff --git a/src/lib/configurator/sidebar/keyboard-menu.svelte b/src/lib/configurator/sidebar/keyboard-menu.svelte
+index dfd64df..a18fe09 100644
+--- a/src/lib/configurator/sidebar/keyboard-menu.svelte
++++ b/src/lib/configurator/sidebar/keyboard-menu.svelte
+@@ -20,8 +20,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+     KeyboardIcon,
+     LogOutIcon,
+   } from "@lucide/svelte"
++  import { base } from "$app/paths"
+   import * as DropdownMenu from "$lib/components/ui/dropdown-menu"
+   import * as Sidebar from "$lib/components/ui/sidebar"
++  import { t } from "$lib/i18n"
+   import { displayUInt16 } from "$lib/integer"
+   import { keyboardContext } from "$lib/keyboard"
+ 
+@@ -65,9 +67,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
          {#if demo}
            <DropdownMenu.Item class="gap-2 p-2">
              {#snippet child({ props })}
 -              <a href="/" {...props}>
 +              <a href={base + "/"} {...props}>
                  <LogOutIcon class="size-4" />
-                 Exit Demo
+-                Exit Demo
++                {$t("Exit Demo")}
                </a>
-diff --git a/src/routes/+error.svelte b/src/routes/+error.svelte
-index 25fadc3..c6ab670 100644
---- a/src/routes/+error.svelte
-+++ b/src/routes/+error.svelte
-@@ -14,6 +14,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
- -->
+             {/snippet}
+           </DropdownMenu.Item>
+@@ -77,7 +79,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+             onSelect={() => keyboard.forget()}
+           >
+             <CableIcon class="size-4" />
+-            Disconnect
++            {$t("Disconnect")}
+           </DropdownMenu.Item>
+         {/if}
+       </DropdownMenu.Content>
+diff --git a/src/lib/configurator/sidebar/sidebar-tabs.svelte b/src/lib/configurator/sidebar/sidebar-tabs.svelte
+index 1b4db2a..2fabe06 100644
+--- a/src/lib/configurator/sidebar/sidebar-tabs.svelte
++++ b/src/lib/configurator/sidebar/sidebar-tabs.svelte
+@@ -15,6 +15,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
  
  <script lang="ts">
-+  import { base } from "$app/paths"
+   import * as Sidebar from "$lib/components/ui/sidebar"
++  import { t } from "$lib/i18n"
+   import { Tabs } from "bits-ui"
+   import { globalStateContext } from "../context.svelte"
+   import { sidebarTabGroups } from "../lib/layout"
+@@ -25,7 +26,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ {#each sidebarTabGroups as { group, tabs } (group)}
+   <Sidebar.Group>
+     <Sidebar.GroupLabel class="truncate">
+-      {group}
++      {$t(group)}
+     </Sidebar.GroupLabel>
+     <Sidebar.Menu>
+       {#each tabs as { label, value, icon: Icon } (value)}
+@@ -34,11 +35,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+             {#snippet child({ props })}
+               <Sidebar.MenuButton
+                 isActive={tab === value}
+-                tooltipContent={label}
++                tooltipContent={$t(label)}
+                 {...props}
+               >
+                 <Icon />
+-                <span>{label}</span>
++                <span>{$t(label)}</span>
+               </Sidebar.MenuButton>
+             {/snippet}
+           </Tabs.Trigger>
+diff --git a/src/lib/i18n/index.ts b/src/lib/i18n/index.ts
+new file mode 100644
+index 0000000..d175d0a
+--- /dev/null
++++ b/src/lib/i18n/index.ts
+@@ -0,0 +1,52 @@
++import { derived, get, writable } from "svelte/store"
++import zhCN from "./zh-CN.json"
++
++export type Language = "en" | "zh-CN"
++export const language = writable<Language>("en")
++const messages: Record<string, string> = zhCN
++export function translateFor(
++  locale: Language,
++  text: string,
++  values: Record<string, string | number> = {},
++) {
++  const translated = locale === "zh-CN" ? (messages[text] ?? text) : text
++  return translated.replace(/\{(\w+)\}/g, (match, key) =>
++    String(values[key] ?? match),
++  )
++}
++export const t = derived(
++  language,
++  (locale) =>
++    (text: string, values: Record<string, string | number> = {}) =>
++      translateFor(locale, text, values),
++)
++export function translate(
++  text: string,
++  values: Record<string, string | number> = {},
++) {
++  return translateFor(get(language), text, values)
++}
++export function setLanguage(locale: Language) {
++  language.set(locale)
++  if (typeof document !== "undefined") document.documentElement.lang = locale
++  try {
++    localStorage.setItem("hmkconf-language", locale)
++  } catch {
++    /* Storage may be unavailable. */
++  }
++}
++export function initializeLanguage() {
++  let saved: string | null = null
++  try {
++    saved = localStorage.getItem("hmkconf-language")
++  } catch {
++    /* Use browser preference. */
++  }
++  const locale =
++    saved === "en" || saved === "zh-CN"
++      ? saved
++      : navigator.language.toLowerCase().startsWith("zh")
++        ? "zh-CN"
++        : "en"
++  setLanguage(locale)
++}
+diff --git a/src/lib/i18n/zh-CN.json b/src/lib/i18n/zh-CN.json
+new file mode 100644
+index 0000000..cb56e1b
+--- /dev/null
++++ b/src/lib/i18n/zh-CN.json
+@@ -0,0 +1,210 @@
++{
++  "A web-based configurator for libhmk keyboards": "适用于 libhmk 键盘的网页配置工具",
++  "A web-based configurator for libhmk keyboards. Customize keyboard bindings, adjust actuation points, enable Rapid Trigger, and more.": "适用于 libhmk 键盘的网页配置工具。自定义键位、调整触发行程、启用快速触发等。",
++  "Connect Keyboard": "连接键盘",
++  "Try Demo": "体验演示",
++  "Screenshot": "界面预览",
++  "Toggle theme": "切换主题",
++  "Light": "浅色",
++  "Dark": "深色",
++  "System": "跟随系统",
++  "Profiles": "配置方案",
++  "Profile": "配置方案",
++  "Keyboard Configuration": "键盘配置",
++  "Remap": "键位映射",
++  "Performance": "性能",
++  "Advanced Keys": "高级按键",
++  "Gamepad": "游戏手柄",
++  "Calibration": "校准",
++  "Settings": "设置",
++  "Toggle Sidebar": "切换侧边栏",
++  "Sidebar": "侧边栏",
++  "Displays the mobile sidebar.": "显示移动端侧边栏。",
++  "Your window is too small. Please resize your window, or zoom out.": "窗口尺寸过小，请放大窗口或缩小页面。",
++  "Action": "动作",
++  "Active": "启用",
++  "Active Advanced Keys (": "已启用的高级按键（",
++  "Actuation Point": "触发行程",
++  "Add": "添加",
++  "Add Advanced Key": "添加高级按键",
++  "Advanced": "高级",
++  "Analog": "模拟输入",
++  "Analog Value": "模拟值",
++  "Bindings": "绑定",
++  "Bottom Out Point": "触底行程",
++  "Cancel": "取消",
++  "Clear Search": "清空搜索",
++  "Close": "关闭",
++  "Continue": "继续",
++  "Delay": "延迟",
++  "Delete": "删除",
++  "Delete Action": "删除动作",
++  "Deselect All": "取消全选",
++  "Disconnect": "断开连接",
++  "Done": "完成",
++  "Duplicate From": "复制自",
++  "Edit": "编辑",
++  "Exit Demo": "退出演示",
++  "Export": "导出",
++  "Factory Reset": "恢复出厂设置",
++  "Factory Reset?": "恢复出厂设置？",
++  "Go Back Home": "返回首页",
++  "Hold": "长按",
++  "Import": "导入",
++  "Info": "信息",
++  "Key": "按键",
++  "Key Tester": "按键测试",
++  "Layer": "层",
++  "Loading...": "加载中…",
++  "Open Menu": "打开菜单",
++  "Page not found": "页面不存在",
++  "Pressed Keys": "已按下的按键",
++  "Recalibrate": "重新校准",
++  "Released Keys": "已松开的按键",
++  "Remove": "移除",
++  "Remove this": "移除此",
++  "binding?": "绑定？",
++  "Reset Current Layer": "重置当前层",
++  "Reset Selected": "重置所选",
++  "Restart Keyboard": "重启键盘",
++  "Restore Default": "恢复默认",
++  "Search...": "搜索…",
++  "Select All": "全选",
++  "Setup": "设置",
++  "Show Keymap": "显示键位",
++  "Tap": "轻点",
++  "Tapping Term": "长按判定时间",
++  "Tick Rate": "动作间隔",
++  "Warning": "提示",
++  "Configure Analog Curve": "配置模拟曲线",
++  "Configure Controller Bindings": "配置手柄绑定",
++  "Configure DKS Bindings": "配置 DKS 绑定",
++  "Configure Layout": "配置布局",
++  "Configure Macro Actions": "配置宏动作",
++  "Configure Null Bind Resolution Behavior": "配置双键互斥处理方式",
++  "Configure Profiles": "配置方案管理",
++  "Configure Tap-Hold Bindings": "配置轻点 / 长按绑定",
++  "Configure Toggle Binding": "配置切换绑定",
++  "Current Active Profile": "当前启用方案",
++  "8000Hz Polling Rate": "8000 Hz 轮询率",
++  "Enable Keyboard Inputs": "启用键盘输入",
++  "Enable Rapid Trigger": "启用快速触发（RT）",
++  "Enable XInput Interface": "启用 XInput 接口",
++  "Enter Bootloader Mode": "进入 Bootloader 模式",
++  "Gamepad Override": "手柄输入优先",
++  "Hold on Other Key Press": "按下其他键时触发长按",
++  "Initial Bottom Out Threshold": "初始触底阈值",
++  "Initial Noise Floor": "初始噪声基线",
++  "Key End Deadzone": "按键底部死区",
++  "Key Start Deadzone": "按键顶部死区",
++  "Key Press Distance": "按下行程",
++  "Rapid Trigger Release Sensitivity": "快速触发松开灵敏度",
++  "Continuous Rapid Trigger": "持续快速触发",
++  "Separate Press/Release Sensitivity": "分别设置按下 / 松开灵敏度",
++  "Alternative Fully Pressed Behavior": "同时触底时的替代行为",
++  "Save Bottom Out Threshold": "保存触底阈值",
++  "Save Current Threshold": "保存当前阈值",
++  "Snappy Joystick": "灵敏摇杆模式",
++  "Square Joystick Mode": "方形摇杆模式",
++  "XInput interface is disabled": "XInput 接口未启用",
++  "Are you sure you want to factory reset your keyboard?": "确定要将键盘恢复为出厂设置吗？",
++  "Are you sure you want to remove this binding?": "确定要移除此绑定吗？",
++  "Assign": "分配",
++  "Assign a binding for the toggle action of the key.": "为按键的切换动作分配绑定。",
++  "Assign bindings for tap and hold actions of the key.": "为按键的轻点和长按动作分配绑定。",
++  "Assign gamepad buttons to your keyboard.": "将游戏手柄按钮分配到键盘按键。",
++  "Allow keyboard inputs to be sent along with gamepad inputs.": "允许在发送手柄输入的同时发送键盘输入。",
++  "Disable keyboard inputs on keys bound to gamepad buttons.": "禁用已绑定手柄按钮的按键所发送的键盘输入。",
++  "Configure sensitivity for key presses and releases independently.": "分别设置按下和松开的灵敏度。",
++  "Deactivates Rapid Trigger only when the key is fully released, instead of at the actuation point.": "仅在按键完全松开时停用快速触发，而非在触发行程处停用。",
++  "Enable this option to register both key presses when keys are fully pressed simultaneously, bypassing the resolution behavior.": "启用后，当两个按键同时触底时，同时触发两个按键，忽略互斥处理规则。",
++  "Immediately perform the hold action if another non-Tap-Hold key is pressed.": "按下其他非轻点 / 长按按键时，立即执行长按动作。",
++  "Manage your keyboard profiles here. You can import, export, and customize them.": "在此管理键盘配置方案，可导入、导出和自定义。",
++  "No active advanced keys...": "尚未启用高级按键…",
++  "No gamepad analog input will be sent.": "不发送手柄模拟输入。",
++  "No macro actions...": "尚无宏动作…",
++  "Rapid Trigger is automatically disabled for Dynamic Keystroke keys.": "动态键程（DKS）按键会自动禁用快速触发。",
++  "Remove the circular boundaries of the joystick for full range of motion.": "移除摇杆的圆形边界，以使用完整的移动范围。",
++  "Select how Null Bind resolves key presses when both keys are pressed simultaneously.": "选择同时按下两个按键时，双键互斥的处理方式。",
++  "Set the actuation point at which Null Bind becomes active.": "设置启用双键互斥的触发行程。",
++  "Set the actuation point at which the key is considered fully pressed.": "设置将按键视为完全按下的行程。",
++  "Set the actuation point for \"Key fully pressed\" and \"Key released from fully pressed\" actions.": "设置“按键完全按下”和“按键从触底松开”动作的触发行程。",
++  "Set the actuation point for \"Key press\" and \"Key release\" actions.": "设置“按下”和“松开”动作的触发行程。",
++  "Set the duration the key must be held to perform the hold action.": "设置执行长按动作所需的持续按住时间。",
++  "Set the duration the key must be held to perform the normal key behavior.": "设置执行普通按键行为所需的持续按住时间。",
++  "Set the minimum distance change required for Rapid Trigger to register a key release.": "设置快速触发识别松开动作所需的最小行程变化。",
++  "The keyboard will disconnect and reconnect. No changes will be made to your keyboard settings.": "键盘将断开并重新连接，不会更改键盘设置。",
++  "The keyboard will restart and enter bootloader mode if it is supported by the firmware. No changes will be made to your keyboard settings.": "若固件支持，键盘将重启并进入 Bootloader 模式，不会更改键盘设置。",
++  "Revert the keyboard to its factory settings defined by the firmware. All user data and settings will be lost.": "将键盘恢复为固件定义的出厂设置。所有用户数据和设置都将丢失。",
++  "Allow your keyboard to be recognized as an Xbox controller for gamepad input. Restart the keyboard to apply changes. This setting applies globally across all profiles.": "允许将键盘识别为 Xbox 控制器，以发送手柄输入。重启键盘后生效，此设置适用于所有配置方案。",
++  "Enable the 8000Hz polling rate for faster response times, but may increase the CPU usage of the host device. Restart the keyboard to apply changes. This setting applies globally across all profiles.": "启用 8000 Hz 轮询率以缩短响应时间，但可能增加主机 CPU 占用。重启键盘后生效，此设置适用于所有配置方案。",
++  "Enable Rapid Trigger to compare keys only when Rapid Trigger registers a key press. Additional Rapid Trigger options are available in the Performance tab.": "启用后，仅在快速触发识别到按下动作时比较按键。其他快速触发选项位于“性能”页面。",
++  "Rapid Trigger registers key presses and releases based on changes in key distance rather than absolute position. It activates and deactivates at the actuation point.": "快速触发根据行程变化识别按下和松开，而非固定位置；在触发行程处启用或停用。",
++  "Assign bindings using the menu on the right. For a tap action, click the plus icon once. For a hold action, click the plus icon and drag it to the desired key position based on your preferred behavior.": "使用右侧菜单分配绑定。轻点动作只需点击一次加号；长按动作需按住加号，并按预期行为拖动到相应的按键位置。",
++  "Create a sequence of actions to be triggered when the key is pressed. Assign bindings for each action using the menu on the right.": "创建按下按键时执行的动作序列，使用右侧菜单为每个动作分配绑定。",
++  "Maximum gamepad analog input will be sent. For joysticks, the angle will snap to the nearest 45 degree, functioning similar to a D-Pad.": "发送最大手柄模拟输入。摇杆方向将吸附到最近的 45 度方向，效果类似方向键。",
++  "Modify how keyboard analog values translate to gamepad analog inputs. You can manually adjust the analog curve or select a preset from below. These settings affect both joysticks and triggers.": "调整键盘模拟值转换为手柄模拟输入的方式。可手动调整曲线或选择下方预设，此设置同时影响摇杆和扳机。",
++  "Periodically save the per-key bottom-out threshold values after some inactivity to be restored on next boot. The saved values will only be cleared on recalibration. This setting applies globally across all profiles.": "在一段时间无操作后定期保存各按键的触底阈值，以便下次启动恢复。仅重新校准会清除保存值，此设置适用于所有配置方案。",
++  "The initial bottom out threshold represents the estimated change in analog value when a key is fully pressed. It should be set slightly lower than the actual change in analog readings when keys are fully pressed to prevent deadzones. Recalibrate the keyboard to apply changes. This setting applies globally across all profiles.": "初始触底阈值表示按键完全按下时模拟值的预估变化量。应略低于实际触底时的变化量，以避免死区。重新校准后生效，此设置适用于所有配置方案。",
++  "The initial noise floor represents the estimated analog value when a key is at rest. It should be set slightly higher than the actual analog readings of all keys in their resting position to prevent deadzones. Recalibrate the keyboard to apply changes. This setting applies globally across all profiles.": "初始噪声基线表示按键静止时的预估模拟值。应略高于所有按键静止时的实际读数，以避免死区。重新校准后生效，此设置适用于所有配置方案。",
++  "The tick rate determines the delay between two consecutive actions performed by Advanced Keys. For example, a tap action performs a key press and release consecutively. A lower tick rate means less delay, but may result in missed inputs if the game or application cannot keep up with processing the inputs.": "动作间隔决定高级按键两个连续动作之间的延迟。例如轻点会依次执行按下和松开。较低的值可减少延迟，但若游戏或应用处理不及时，可能导致漏输入。",
++  "The tick rate is per profile and only affects Dynamic Keystroke, Tap-Hold, and Macro keys.": "动作间隔按配置方案独立设置，仅影响动态键程、轻点 / 长按和宏按键。",
++  "This tab requests data from the keyboard at a high frequency, which may impact performance. Please close this tab or switch to another one when performing other performance-sensitive tasks with your keyboard.": "此页面会高频读取键盘数据，可能影响性能。使用键盘执行对性能敏感的任务时，请关闭或切换此页面。",
++  "Use the maximum analog value between opposite joystick axes instead of combining them for more responsive movement.": "对相反摇杆方向取较大的模拟值，而非合并两个值，使移动更灵敏。",
++  "Null Bind": "双键互斥（SOCD）",
++  "Dynamic Keystroke": "动态键程（DKS）",
++  "Tap-Hold": "轻点 / 长按",
++  "Toggle": "切换",
++  "Macro": "宏",
++  "Last Input Priority": "后输入优先",
++  "Absolute Priority (Key 1)": "固定优先（按键 1）",
++  "Absolute Priority (Key 2)": "固定优先（按键 2）",
++  "Neutral": "中立",
++  "Distance Priority (Rappy Snappy)": "行程优先（Rappy Snappy）",
++  "Activate the key that was pressed last.": "触发最后按下的按键。",
++  "Key 1 will take priority over Key 2.": "按键 1 优先于按键 2。",
++  "Key 2 will take priority over Key 1.": "按键 2 优先于按键 1。",
++  "Neither key will be activated.": "两个按键均不触发。",
++  "Activate whichever key is pressed down further.": "触发行程更深的按键。",
++  "Monitor 2 selected keys and register them according to your chosen behavior.": "监测两个选定的按键，并根据所选规则触发。",
++  "Assign up to 4 bindings to a single key. Each binding can be configured with 4 different actions based on the key's position.": "为单个按键分配最多 4 个绑定。每个绑定可根据按键位置设置 4 种不同动作。",
++  "Register different bindings depending on whether the key is tapped or held.": "根据轻点或长按触发不同的绑定。",
++  "Toggle between key press and release states. Hold the key for a normal key behavior.": "切换按下和松开状态。持续按住时执行普通按键行为。",
++  "Run a sequence of configurable actions when the key is pressed.": "按下按键时执行自定义动作序列。",
++  "This Advanced Key type is not recognized.": "无法识别此高级按键类型。",
++  "This Null Bind behavior is not recognized.": "无法识别此双键互斥行为。",
++  "Key press": "按下",
++  "Key fully pressed": "完全按下",
++  "Key release from fully pressed": "从触底松开",
++  "Key release": "松开",
++  "Linear": "线性",
++  "Aggressive": "激进",
++  "Smooth": "平滑",
++  "Instant": "即时",
++  "Digital": "数字",
++  "Basic": "基础",
++  "Extended": "扩展",
++  "Special": "特殊",
++  "Media": "媒体",
++  "Mouse": "鼠标",
++  "Successfully saved calibration threshold.": "已保存校准阈值。",
++  "The selected file is not a valid JSON.": "所选文件不是有效的 JSON 文件。",
++  "The selected file is not a valid keyboard metadata. See console for details.": "所选文件不是有效的键盘配置数据。详情请查看控制台。",
++  "Unexpected keyboard configuration schema error. See console for details.": "键盘配置格式错误。详情请查看控制台。",
++  "WebHID is not supported in this browser.": "此浏览器不支持 WebHID，请使用支持 WebHID 的桌面浏览器。",
++  "Unsupported firmware version": "不支持此固件版本",
++  "The keyboard does not match the configuration": "键盘与配置不匹配",
++  "Profile {number}": "配置方案 {number}",
++  "Successfully imported Profile {number}.": "已导入配置方案 {number}。",
++  "Successfully exported Profile {number}.": "已导出配置方案 {number}。",
++  "{name} disconnected.": "{name} 已断开连接。",
++  "Successfully connected to {name}.": "已连接 {name}。",
++  " Newer version of the firmware is available.": " 有更新版本的固件可用。",
++  "Select {number} keys to assign {title} to.": "请选择 {number} 个按键以分配{title}。",
++  "Rapid Trigger Press Sensitivity": "快速触发按下灵敏度",
++  "Rapid Trigger Sensitivity": "快速触发灵敏度",
++  "Set the specific distance at which Rapid Trigger activates and deactivates.": "设置快速触发启用和停用的具体行程。",
++  "Set the specific distance at which a key press and release is registered.": "设置识别按下和松开动作的具体行程。",
++  "Set the minimum distance change required for Rapid Trigger to register a key press.": "设置快速触发识别按下动作所需的最小行程变化。",
++  "Set the minimum distance change required for Rapid Trigger to register a key press or release.": "设置快速触发识别按下或松开动作所需的最小行程变化。"
++}
+diff --git a/src/routes/+error.svelte b/src/routes/+error.svelte
+index 25fadc3..c51c2a6 100644
+--- a/src/routes/+error.svelte
++++ b/src/routes/+error.svelte
+@@ -15,16 +15,21 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+ 
+ <script lang="ts">
    import { HouseIcon } from "@lucide/svelte"
++  import { base } from "$app/paths"
    import Footer from "$lib/components/footer.svelte"
    import { Button } from "$lib/components/ui/button"
-@@ -23,7 +24,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
++  import { t } from "$lib/i18n"
+ </script>
+ 
+ <main class="grid min-h-svh place-items-center px-6 py-24">
    <div class="text-center">
-     <h1 class="text-5xl font-semibold tracking-tight">Page not found</h1>
+-    <h1 class="text-5xl font-semibold tracking-tight">Page not found</h1>
++    <h1 class="text-5xl font-semibold tracking-tight">
++      {$t("Page not found")}
++    </h1>
      <div class="mt-6 grid place-items-center">
 -      <Button href="/" size="lg">
+-        <HouseIcon /> Go Back Home
 +      <Button href={base + "/"} size="lg">
-         <HouseIcon /> Go Back Home
++        <HouseIcon />
++        {$t("Go Back Home")}
        </Button>
      </div>
+   </div>
 diff --git a/src/routes/+layout.svelte b/src/routes/+layout.svelte
-index 14483fc..6c52e68 100644
+index 14483fc..36869d8 100644
 --- a/src/routes/+layout.svelte
 +++ b/src/routes/+layout.svelte
-@@ -14,6 +14,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+@@ -14,12 +14,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
  -->
  
  <script lang="ts">
 +  import { base } from "$app/paths"
    import { Toaster } from "$lib/components/ui/sonner"
++  import { initializeLanguage, t } from "$lib/i18n"
++  import { onMount } from "svelte"
    import "../app.css"
    import "@fontsource-variable/geist/wght.css"
-@@ -29,16 +30,16 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import "@fontsource-variable/geist-mono/wght.css"
+   import { ModeWatcher } from "mode-watcher"
+ 
++  onMount(initializeLanguage)
++
+   let { children } = $props()
+ </script>
+ 
+@@ -27,18 +32,28 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   <title>hmkconf</title>
+   <meta
      name="description"
-     content="A web-based configurator for libhmk keyboards"
+-    content="A web-based configurator for libhmk keyboards"
++    content={$t("A web-based configurator for libhmk keyboards")}
++  />
++  <link
++    rel="icon"
++    href={base + "/favicon.ico"}
++    type="image/x-icon"
++    sizes="48x48"
++  />
++  <link
++    rel="icon"
++    href={base + "/icon0.svg"}
++    type="image/svg+xml"
++    sizes="any"
    />
 -  <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="48x48" />
 -  <link rel="icon" href="/icon0.svg" type="image/svg+xml" sizes="any" />
 -  <link rel="icon" href="/icon1.png" type="image/png" sizes="96x96" />
-+  <link rel="icon" href={base + "/favicon.ico"} type="image/x-icon" sizes="48x48" />
-+  <link rel="icon" href={base + "/icon0.svg"} type="image/svg+xml" sizes="any" />
 +  <link rel="icon" href={base + "/icon1.png"} type="image/png" sizes="96x96" />
    <link
      rel="apple-touch-icon"
@@ -5591,26 +7874,89 @@ index 0000000..e325c17
 +export const prerender = true;
 +export const trailingSlash = "always";
 diff --git a/src/routes/+page.svelte b/src/routes/+page.svelte
-index a51daa1..de6c96b 100644
+index a51daa1..3decb3f 100644
 --- a/src/routes/+page.svelte
 +++ b/src/routes/+page.svelte
-@@ -14,6 +14,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
- -->
+@@ -15,11 +15,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
  
  <script lang="ts">
-+  import { base } from "$app/paths"
    import { CableIcon, ShapesIcon } from "@lucide/svelte"
++  import { base } from "$app/paths"
    import screenshotDark from "$lib/assets/screenshot-dark.png"
    import screenshot from "$lib/assets/screenshot.png"
-@@ -61,7 +62,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   import Footer from "$lib/components/footer.svelte"
+   import { Button } from "$lib/components/ui/button"
+   import Configurator from "$lib/configurator/configurator.svelte"
++  import { t } from "$lib/i18n"
+   import type { Keyboard } from "$lib/keyboard"
+   import { connect } from "$lib/keyboard/hmk-keyboard.svelte"
+   import { HMK_FIRMWARE_MAX_VERSION } from "$lib/libhmk"
+@@ -30,18 +32,20 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+   const handleConnect = async () => {
+     try {
+       keyboard = await connect(({ metadata: { name } }) => {
+-        toast.success(`${name} disconnected.`)
++        toast.success($t("{name} disconnected.", { name }))
+         keyboard = null
+       })
+       if (keyboard) {
+-        let message = `Successfully connected to ${keyboard.metadata.name}.`
++        let message = $t("Successfully connected to {name}.", {
++          name: keyboard.metadata.name,
++        })
+         if (keyboard.version < HMK_FIRMWARE_MAX_VERSION) {
+-          message += " Newer version of the firmware is available."
++          message += $t(" Newer version of the firmware is available.")
+         }
+         toast.success(message)
+       }
+     } catch (err) {
+-      toast.error(String(err))
++      toast.error($t(err instanceof Error ? err.message : String(err)))
+     }
+   }
+ </script>
+@@ -54,15 +58,18 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+       <div class="mx-auto max-w-2xl text-center">
+         <h1 class="text-5xl font-semibold tracking-tight">hmkconf</h1>
+         <p class="mt-4 text-lg font-medium text-wrap text-muted-foreground">
+-          A web-based configurator for libhmk keyboards. Customize keyboard
+-          bindings, adjust actuation points, enable Rapid Trigger, and more.
++          {$t(
++            "A web-based configurator for libhmk keyboards. Customize keyboard bindings, adjust actuation points, enable Rapid Trigger, and more.",
++          )}
+         </p>
+         <div class="mt-6 flex items-center justify-center gap-4">
            <Button onclick={() => handleConnect()} size="lg">
-             <CableIcon /> Connect Keyboard
+-            <CableIcon /> Connect Keyboard
++            <CableIcon />
++            {$t("Connect Keyboard")}
            </Button>
 -          <Button href="/demo" size="lg" variant="outline">
+-            <ShapesIcon /> Try Demo
 +          <Button href={base + "/demo"} size="lg" variant="outline">
-             <ShapesIcon /> Try Demo
++            <ShapesIcon />
++            {$t("Try Demo")}
            </Button>
          </div>
+       </div>
+@@ -70,14 +77,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
+         <div class="overflow-hidden rounded-xl border shadow-md">
+           <img
+             class="dark:hidden"
+-            alt="Screenshot"
++            alt={$t("Screenshot")}
+             src={screenshot}
+             width="1024"
+             height="768"
+           />
+           <img
+             class="not-dark:hidden"
+-            alt="Screenshot"
++            alt={$t("Screenshot")}
+             src={screenshotDark}
+             width="1024"
+             height="768"
 diff --git a/static/manifest.json b/static/manifest.json
 index 2b14ebb..74c3057 100644
 --- a/static/manifest.json
