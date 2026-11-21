@@ -1,5 +1,5 @@
 Keyspensory unified configurator beta
-https://github.com/freather-keyspensory/hmkconf/tree/f9007d3b0393084eeee627859ac6decd509f4ee5
+https://github.com/freather-keyspensory/hmkconf/tree/a53624a6cf51c9c2efb00c3284b5a9e74feddc07
 
 Application license: LICENSE.txt
 VIA definition catalog: definitions/LICENSE.txt and definitions/upstream-revision.txt
