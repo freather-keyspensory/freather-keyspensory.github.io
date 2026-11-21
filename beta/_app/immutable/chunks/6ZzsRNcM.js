@@ -1,1 +1,0 @@
-import{Ft as e,It as t}from"./w7g7VGyC.js";var n=t.object({actuationPoint:e,rtDown:e,rtUp:e,continuous:t.boolean()}),r={actuationPoint:128,rtDown:0,rtUp:0,continuous:!1};export{n,r as t};

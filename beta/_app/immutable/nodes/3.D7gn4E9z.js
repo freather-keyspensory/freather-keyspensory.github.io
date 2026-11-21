@@ -1,0 +1,1 @@
+import{Lt as e,Rt as t,f as n,jt as r,ot as i}from"../chunks/BLTNSIP6.js";import"../chunks/xihTtKlq.js";import"../chunks/-vKgei8A.js";import{t as a}from"../chunks/BNPoiNSB.js";import{t as o}from"../chunks/DiEHtA6l.js";function s(s,c){t(c,!1),n();{let e=r(()=>new o);a(s,{get keyboard(){return i(e)}})}e()}export{s as component};
