@@ -15,3 +15,7 @@ Static GitHub Pages release. The hub opens each configurator in a new tab.
 Original software licenses are included in the respective app directories. Source patches and pinned upstream revisions are in release-source/. No connected-keyboard hardware test has been performed.
 
 GitHub Pages publishes the main branch root. .nojekyll preserves Svelte's _app assets. VIA route directories include its entrypoint so direct navigation works.
+
+## Unified configurator beta
+
+[Open the beta](https://config.keyspensory.store/beta/unified/) or [view its source and build instructions](https://github.com/freather-keyspensory/hmkconf/tree/unified-beta). The exact source revision is recorded in [beta/SOURCE.txt](beta/SOURCE.txt).
